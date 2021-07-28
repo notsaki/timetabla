@@ -1,22 +1,22 @@
 import { Request, Response, Router } from "express";
 import { userValidatorMiddleware } from "../middleware/ValidatorMiddleware";
-import UserService from "../service/UserService";
-import { RegisterUser } from "../schema/UserSchema";
+import UserSchema, { User } from "../schema/UserSchema";
+import userConflictMiddleware from "../middleware/UserConflictMiddleware";
+import hash from "../utils/Hash";
 
 const userController: Router = Router();
 
-userController.post("/", userValidatorMiddleware, async (req: Request, res: Response) => {
-    const registerUser = new RegisterUser().assign(req.body);
+userController.post("/", userValidatorMiddleware, userConflictMiddleware, async (req: Request, res: Response) => {
+    const user: User = new User().assign(req.body);
+
+    user.password = hash(user.password);
 
     try {
-        await UserService.save(registerUser);
+        await new UserSchema(user).save();
+
         res.status(201);
     } catch (error) {
-        if (error.message.indexOf("4000") !== -1) {
-            res.status(409);
-        } else {
-            res.status(500);
-        }
+        res.status(500);
     }
 
     res.send();
