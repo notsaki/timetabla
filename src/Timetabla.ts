@@ -1,12 +1,12 @@
 import "dotenv/config";
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import apiController from "./Api";
-import UserSchema, { RegisterUser, Role, User } from "./schema/UserSchema";
-import UserService from "./service/UserService";
+import UserSchema, { Role, User } from "./schema/UserSchema";
 import hash from "./utils/Hash";
+import * as fs from "fs";
 
 const app: Express = express();
 
@@ -32,24 +32,44 @@ mongoose
     })
     .then(
         async () => {
-            if (process.env.ENVIRONMENT === "test") {
-                await UserSchema.collection.drop();
-            }
-
-            if (!(await UserSchema.exists({ username: "admin" }))) {
-                await new UserSchema({
-                    username: process.env.APPLICATION_ADMIN_USERNAME,
-                    password: hash(process.env.APPLICATION_ADMIN_PASSWORD!),
-                    email: process.env.APPLICATION_ADMIN_EMAIL,
-                    fullname: process.env.APPLICATION_ADMIN_FULLNAME,
-                    role: Role.Admin,
-                    activationCode: null,
-                }).save();
-            }
-
             console.log("Connection to database established.");
+
+            switch (process.env.ENVIRONMENT) {
+                case "test":
+                    try {
+                        await UserSchema.collection.drop();
+                    } catch (error) {}
+
+                    let users: User[] = JSON.parse(fs.readFileSync("./src/testdata/users.json", "utf-8"));
+
+                    users.map((user: User) => {
+                        user.password = hash(user.password);
+                        return user;
+                    });
+
+                    UserSchema.insertMany(users)
+                        .then(() => console.log("Testing users have been saved."))
+                        .catch((error) => console.log(`Could not save test users: ${error.message}`));
+
+                    break;
+                case "prod":
+                    if (!(await UserSchema.exists({ username: "admin" }))) {
+                        new UserSchema({
+                            username: process.env.APPLICATION_ADMIN_USERNAME,
+                            password: hash(process.env.APPLICATION_ADMIN_PASSWORD!),
+                            email: process.env.APPLICATION_ADMIN_EMAIL,
+                            fullname: process.env.APPLICATION_ADMIN_FULLNAME,
+                            role: Role.Admin,
+                            activationCode: null,
+                        })
+                            .save()
+                            .then(() => console.log("Admin user has been created."))
+                            .catch((error) => console.log(`Could not create admin user: ${error.message}`));
+                    }
+                    break;
+            }
         },
-        error => console.log(`Could not connect to database: ${error.message}`)
+        (error) => console.log(`Could not connect to database: ${error.message}`)
     );
 
 app.listen(8080, () => console.log("Server started in port 8080."));

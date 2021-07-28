@@ -1,12 +1,11 @@
 import { Request, Response, Router } from "express";
 import { userValidatorMiddleware } from "../middleware/ValidatorMiddleware";
-import passwordHashMiddleware from "../middleware/PasswordHashMiddleware";
 import UserService from "../service/UserService";
 import { RegisterUser } from "../schema/UserSchema";
 
 const userController: Router = Router();
 
-userController.post("/", userValidatorMiddleware, passwordHashMiddleware, async (req: Request, res: Response) => {
+userController.post("/", userValidatorMiddleware, async (req: Request, res: Response) => {
     const registerUser = new RegisterUser().assign(req.body);
 
     try {
