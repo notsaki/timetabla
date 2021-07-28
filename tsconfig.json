@@ -5,6 +5,7 @@
             "es2015",
             "dom"
         ],
+        "allowSyntheticDefaultImports": true,
         "allowJs": true,
         "module": "commonjs",
         "moduleResolution": "node",

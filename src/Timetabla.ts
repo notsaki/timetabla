@@ -6,7 +6,7 @@ import bodyParser from "body-parser";
 import apiController from "./Api";
 import UserSchema, { Role, User } from "./schema/UserSchema";
 import hash from "./utils/Hash";
-import * as fs from "fs";
+import insertTestData from "./utils/InsertTestData";
 
 const app: Express = express();
 
@@ -35,22 +35,8 @@ mongoose
             console.log("Connection to database established.");
 
             switch (process.env.ENVIRONMENT) {
-                case "test":
-                    try {
-                        await UserSchema.collection.drop();
-                    } catch (error) {}
-
-                    let users: User[] = JSON.parse(fs.readFileSync("./src/testdata/users.json", "utf-8"));
-
-                    users.map((user: User) => {
-                        user.password = hash(user.password);
-                        return user;
-                    });
-
-                    UserSchema.insertMany(users)
-                        .then(() => console.log("Testing users have been saved."))
-                        .catch((error) => console.log(`Could not save test users: ${error.message}`));
-
+                case "dev":
+                    insertTestData().then(() => console.log("Testing data added successfully!"));
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
@@ -73,3 +59,5 @@ mongoose
     );
 
 app.listen(8080, () => console.log("Server started in port 8080."));
+
+export default app;
