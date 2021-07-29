@@ -1,10 +1,9 @@
-import crypto from "crypto";
+import bcrypt from "bcrypt";
 
-function hash(text: string): string {
-    const salt: string = crypto.randomBytes(16).toString("hex");
-    const hash = crypto.pbkdf2Sync(text, salt, 1000, 64, "sha512").toString("hex");
-
-    return `${salt}.${hash}`;
+export function hashNew(text: string): string {
+    return bcrypt.hashSync(text, parseInt(process.env.PASSWORD_HASH_ROUNDS!));
 }
 
-export default hash;
+export function verify(hash: string, text: string): boolean {
+    return bcrypt.compareSync(hash, text);
+}

@@ -1,14 +1,51 @@
 import "dotenv/config";
-import express, { Express } from "express";
-import mongoose from "mongoose";
+import express from "express";
+import mongoose, { Error } from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import apiController from "./Api";
 import UserSchema, { Role, User } from "./schema/UserSchema";
-import hash from "./utils/Hash";
-import insertTestData from "./utils/InsertTestData";
+import insertTestData from "../test/utils/InsertTestData";
+import session, { SessionOptions } from "express-session";
+import UserService from "./service/UserService";
+import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
 
-const app: Express = express();
+const PORT = 8080;
+
+const MongoStore: typeof MongoDBStore = ConnectMongoDBSession(session);
+const store: MongoDBStore = new MongoStore({
+    uri: process.env.DB_URI!,
+    collection: "sessions",
+});
+
+declare module "express-session" {
+    export interface SessionData {
+        user: {
+            id: string;
+            authenticated: boolean;
+        };
+    }
+}
+
+let sessionSettings: SessionOptions = {
+    name: "user",
+    secret: process.env.SESSION_SECRET_KEY!,
+    saveUninitialized: true,
+    cookie: {
+        domain: "127.0.0.1:8080",
+        maxAge: 1000 * 60 * 60 * 24,
+        secure: false,
+    },
+    resave: false,
+    store: store,
+};
+
+const app = express();
+
+if (process.env.ENVIRONMENT === "prod") {
+    app.set("trust proxy", 1);
+    sessionSettings.cookie!.secure = true;
+}
 
 /*
  * Middlewares
@@ -16,6 +53,7 @@ const app: Express = express();
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session(sessionSettings));
 
 /*
  * Controllers
@@ -40,15 +78,16 @@ mongoose
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
-                        new UserSchema({
-                            username: process.env.APPLICATION_ADMIN_USERNAME,
-                            password: hash(process.env.APPLICATION_ADMIN_PASSWORD!),
-                            email: process.env.APPLICATION_ADMIN_EMAIL,
-                            fullname: process.env.APPLICATION_ADMIN_FULLNAME,
-                            role: Role.Admin,
-                            activationCode: null,
-                        })
-                            .save()
+                        UserService.saveNew(
+                            new User().assign({
+                                username: process.env.APPLICATION_ADMIN_USERNAME,
+                                password: process.env.APPLICATION_ADMIN_PASSWORD!,
+                                email: process.env.APPLICATION_ADMIN_EMAIL,
+                                fullname: process.env.APPLICATION_ADMIN_FULLNAME,
+                                role: Role.Admin,
+                                activationCode: null,
+                            })
+                        )
                             .then(() => console.log("Admin user has been created."))
                             .catch((error) => console.log(`Could not create admin user: ${error.message}`));
                     }
@@ -58,6 +97,6 @@ mongoose
         (error) => console.log(`Could not connect to database: ${error.message}`)
     );
 
-app.listen(8080, () => console.log("Server started in port 8080."));
+app.listen(PORT, () => console.log(`Server started in port ${PORT}.`));
 
 export default app;
