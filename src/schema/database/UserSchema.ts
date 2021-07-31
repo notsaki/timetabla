@@ -1,8 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IsDefined, Matches } from "class-validator";
-import { Expose } from "class-transformer";
-import randomString from "../utils/RandomString";
-import { log } from "util";
+import randomString from "../../utils/RandomString";
 
 export enum Role {
     Student,
@@ -10,56 +7,11 @@ export enum Role {
     Admin,
 }
 
-const regex = {
+export const regex = {
     username: /^[A-Za-z_][A-Za-z0-9_]{3,31}$/,
     password: /^.{8,1024}$/,
     email: /^.+@.+$/,
 };
-
-export class LoginCredentials {
-    @IsDefined()
-    @Expose()
-    username: string;
-
-    @IsDefined()
-    @Expose()
-    password: string;
-
-    assign(loginCredentials: any) {
-        this.username = loginCredentials.username;
-        this.password = loginCredentials.password;
-        return this;
-    }
-}
-
-export class RegisterUser {
-    @IsDefined()
-    @Expose()
-    @Matches(RegExp(regex.username))
-    username: string;
-
-    @IsDefined()
-    @Expose()
-    @Matches(RegExp(regex.password))
-    password: string;
-
-    @IsDefined()
-    @Expose()
-    @Matches(RegExp(regex.email))
-    email: string;
-
-    @IsDefined()
-    @Expose()
-    fullname: string;
-
-    assign(registerUser: any): RegisterUser {
-        this.username = registerUser.username;
-        this.password = registerUser.password;
-        this.email = registerUser.email;
-        this.fullname = registerUser.fullname;
-        return this;
-    }
-}
 
 export class User {
     _id: number;

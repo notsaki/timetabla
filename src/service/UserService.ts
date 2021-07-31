@@ -1,4 +1,4 @@
-import UserSchema, { User } from "../schema/UserSchema";
+import UserSchema, { User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
 
 class UserService {

@@ -1,4 +1,4 @@
-import UserSchema, { User } from "../../src/schema/UserSchema";
+import UserSchema, { User } from "../../src/schema/database/UserSchema";
 import fs from "fs";
 import UserService from "../../src/service/UserService";
 

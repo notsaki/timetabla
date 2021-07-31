@@ -4,7 +4,7 @@ import mongoose, { Error } from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import apiController from "./Api";
-import UserSchema, { Role, User } from "./schema/UserSchema";
+import UserSchema, { Role, User } from "./schema/database/UserSchema";
 import insertTestData from "../test/utils/InsertTestData";
 import session, { SessionOptions } from "express-session";
 import UserService from "./service/UserService";
@@ -21,7 +21,8 @@ const store: MongoDBStore = new MongoStore({
 declare module "express-session" {
     export interface SessionData {
         user: {
-            id: string;
+            id?: string;
+            username?: string;
             authenticated: boolean;
         };
     }

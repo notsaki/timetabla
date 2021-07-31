@@ -2,8 +2,9 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 import { insertTestUsers } from "../utils/InsertTestData";
 import app from "../../src/Timetabla";
-import { User } from "../../src/schema/UserSchema";
+import { User } from "../../src/schema/database/UserSchema";
 import { Done } from "@testdeck/core";
+import { Response } from "superagent";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -29,9 +30,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send(user)
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(201);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
@@ -47,9 +48,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send(user)
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(409);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
@@ -65,9 +66,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send(user)
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(422);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
@@ -83,9 +84,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send(user)
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(422);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
@@ -101,9 +102,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send(user)
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(422);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
@@ -112,9 +113,9 @@ describe("Users", () => {
             chai.request(app)
                 .post("/api/user")
                 .send('{"username":"user')
-                .end((error, res) => {
+                .end((error: any, res: Response) => {
                     res.should.have.status(422);
-                    res.body.should.be.empty;
+                    res.body.should.be.not.empty;
                     done();
                 });
         });
