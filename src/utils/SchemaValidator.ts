@@ -3,7 +3,7 @@ import { plainToClass } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
 import ResponseBody from "../schema/responsebody/ResponseBody";
 
-async function validator(req: Request, res: Response, next: NextFunction, model: any) {
+async function schemaValidator(req: Request, res: Response, next: NextFunction, model: any) {
     const body: unknown[] = plainToClass(model, req.body);
 
     validate(body, { skipMissingProperties: true }).then((error: ValidationError[]) => {
@@ -22,4 +22,4 @@ async function validator(req: Request, res: Response, next: NextFunction, model:
     });
 }
 
-export default validator;
+export default schemaValidator;

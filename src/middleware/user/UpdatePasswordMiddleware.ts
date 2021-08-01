@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import loginCredentialsAuthMiddleware from "../auth/LoginCredentialsAuthMiddleware";
-import LoginCredentialsBody from "../../schema/requestbody/LoginCredentialsBody";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
+import verifyLoginCredentials from "../../utils/VerifyLoginCredentials";
+import loginCredentialsErrorHandler from "../../errorhandler/LoginCredentialsErrorHandler";
+import { User } from "../../schema/database/UserSchema";
 
 async function updatePasswordMiddleware(req: Request, res: Response, next: NextFunction) {
     if (!req.session.user) {
@@ -15,12 +16,12 @@ async function updatePasswordMiddleware(req: Request, res: Response, next: NextF
         return;
     }
 
-    const loginCredentials: LoginCredentialsBody = {
-        username: req.session.user.username!,
-        password: req.body.oldPassword,
-    };
-
-    await loginCredentialsAuthMiddleware(loginCredentials, req, res, next);
+    try {
+        res.locals.user = await verifyLoginCredentials(req.session.user.username!, req.body.oldPassword);
+        next();
+    } catch (error: any) {
+        loginCredentialsErrorHandler(error, req, res);
+    }
 }
 
 export default updatePasswordMiddleware;

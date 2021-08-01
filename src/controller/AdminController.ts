@@ -6,7 +6,7 @@ import { adminUpdateUsernameValidator } from "../middleware/ValidatorMiddleware"
 const adminController = Router();
 
 adminController.put(
-    "/user/:usr/username",
+    "/user/:username/username",
     adminUpdateUsernameValidator,
     async (req: Request, res: Response, next: NextFunction) => {
         let body: ResponseBody = {
@@ -16,7 +16,7 @@ adminController.put(
         };
 
         try {
-            await UserService.updateUsername(req.params.usr, req.body.data.newUsername);
+            await UserService.updateUsername(req.params.username, req.body.data.newUsername);
         } catch (error: any) {
             body.status = 500;
             body.message = "Internal server error";

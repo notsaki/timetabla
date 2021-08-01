@@ -5,7 +5,7 @@ import userConflictMiddleware from "../middleware/user/UserConflictMiddleware";
 import UserService from "../service/UserService";
 import ResponseBody from "../schema/responsebody/ResponseBody";
 import updatePasswordMiddleware from "../middleware/user/UpdatePasswordMiddleware";
-import isAuthenticatedMiddleware from "../middleware/auth/IsAuthenticatedMiddleware";
+import isAuthenticatedMid from "../middleware/auth/IsAuthenticatedMid";
 
 const userController = Router();
 
@@ -31,7 +31,7 @@ userController.post("/", userValidator, userConflictMiddleware, async (req: Requ
 
 userController.put(
     "/password",
-    isAuthenticatedMiddleware,
+    isAuthenticatedMid,
     updatePasswordValidator,
     updatePasswordMiddleware,
     async (req: Request, res: Response) => {

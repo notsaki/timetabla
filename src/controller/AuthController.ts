@@ -1,24 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { loginCredentialsValidator } from "../middleware/ValidatorMiddleware";
-import loginCredentialsAuthMiddleware from "../middleware/auth/LoginCredentialsAuthMiddleware";
 import ResponseBody from "../schema/responsebody/ResponseBody";
-import isAuthenticatedMiddleware from "../middleware/auth/IsAuthenticatedMiddleware";
+import isAuthenticatedMid from "../middleware/auth/IsAuthenticatedMid";
 import { Role } from "../schema/database/UserSchema";
-import LoginCredentialsBody from "../schema/requestbody/LoginCredentialsBody";
+import loginCredentialsVerifyMid from "../middleware/auth/LoginCredentialsVerifyMid";
 
 const authController = Router();
 
 authController.post(
     "/login",
     loginCredentialsValidator,
-    async (req: Request, res: Response, next: NextFunction) => {
-        const loginCredentials: LoginCredentialsBody = {
-            username: req.body.username,
-            password: req.body.password,
-        };
-
-        await loginCredentialsAuthMiddleware(loginCredentials, req, res, next);
-    },
+    loginCredentialsVerifyMid,
     async (req: Request, res: Response) => {
         req.session.user = {
             id: res.locals.user._id,
@@ -37,7 +29,7 @@ authController.post(
     }
 );
 
-authController.post("/logout", isAuthenticatedMiddleware, (req: Request, res: Response) => {
+authController.post("/logout", isAuthenticatedMid, (req: Request, res: Response) => {
     req.session.user = {
         id: undefined,
         username: undefined,

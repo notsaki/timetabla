@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
-import LoginCredentialsBody from "../../schema/requestbody/LoginCredentialsBody";
-import loginCredentialsAuthMiddleware from "../auth/LoginCredentialsAuthMiddleware";
+import verifyLoginCredentials from "../../utils/VerifyLoginCredentials";
+import loginCredentialsErrorHandler from "../../errorhandler/LoginCredentialsErrorHandler";
 
 async function adminPasswordValidationMiddleware(req: Request, res: Response, next: NextFunction) {
     if (!req.session.user) {
@@ -15,12 +15,13 @@ async function adminPasswordValidationMiddleware(req: Request, res: Response, ne
         return;
     }
 
-    const loginCredentials: LoginCredentialsBody = {
-        username: req.session.user.username!,
-        password: req.body.adminPassword,
-    };
+    try {
+        await verifyLoginCredentials(req.session.user.username!, req.body.adminPassword);
+    } catch (error: any) {
+        loginCredentialsErrorHandler(error, req, res);
+    }
 
-    await loginCredentialsAuthMiddleware(loginCredentials, req, res, next);
+    next();
 }
 
 export default adminPasswordValidationMiddleware;

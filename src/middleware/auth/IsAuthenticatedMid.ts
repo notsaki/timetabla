@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
 
-function isAuthenticatedMiddleware(req: Request, res: Response, next: NextFunction) {
+function isAuthenticatedMid(req: Request, res: Response, next: NextFunction) {
     if (!req.session.user?.authenticated) {
         const body: ResponseBody = {
             status: 401,
@@ -16,4 +16,4 @@ function isAuthenticatedMiddleware(req: Request, res: Response, next: NextFuncti
     next();
 }
 
-export default isAuthenticatedMiddleware;
+export default isAuthenticatedMid;
