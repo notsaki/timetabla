@@ -4,10 +4,10 @@
   "description": "Web application that manages university weekly schedules.",
   "main": "dist/Timetabla.js",
   "scripts": {
-    "dev": "nodemon",
-    "dev-run": "npm run format && ts-node src/Timetabla.ts",
+    "dev": "ENVIRONMENT=dev nodemon",
+    "dev-run": "ENVIRONMENT=dev npm run format && ts-node src/Timetabla.ts",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
-    "test": "nyc ./node_modules/.bin/_mocha 'test/**/*.ts'"
+    "test": "ENVIRONMENT=test nyc ./node_modules/.bin/_mocha 'test/**/*.ts'"
   },
   "author": "Grigoris Tsakouridis",
   "license": "SEE LICENCE IN LICENCE.md",

@@ -1,19 +1,13 @@
-import chai, { expect } from "chai";
+import chai from "chai";
 import { Done } from "@testdeck/core";
-import { insertTestUsers } from "../utils/InsertTestData";
 import app from "../../src/Timetabla";
 import LoginCredentials from "../../src/schema/requestbody/LoginCredentials";
 import { Response } from "superagent";
+import { resetUserCollectionState } from "../utils/BeforeEach";
 const should = chai.should();
 
 describe("Auth login", () => {
-    beforeEach((done: Done) => {
-        insertTestUsers()
-            .then(done)
-            .catch((error) => {
-                console.log(`Error resetting the database state: ${error}`);
-            });
-    });
+    beforeEach(resetUserCollectionState);
 
     describe("POST /api/auth/login", () => {
         it("Correct username and password should successfully validate user", (done: Done) => {

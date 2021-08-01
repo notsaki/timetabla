@@ -1,22 +1,16 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-import { insertTestUsers } from "../utils/InsertTestData";
 import app from "../../src/Timetabla";
 import { User } from "../../src/schema/database/UserSchema";
 import { Done } from "@testdeck/core";
 import { Response } from "superagent";
+import { resetUserCollectionState } from "../utils/BeforeEach";
 const should = chai.should();
 
 chai.use(chaiHttp);
 
 describe("Users", () => {
-    beforeEach((done: Done) => {
-        insertTestUsers()
-            .then(done)
-            .catch((error) => {
-                console.log(`Error resetting the database state: ${error}`);
-            });
-    });
+    beforeEach(resetUserCollectionState);
 
     describe("POST /api/user", () => {
         it("Should save a new user to the database", (done: Done) => {

@@ -13,3 +13,12 @@ up:
 
 mongo-build: set-mongo-docker-compose build
 mongo-up: set-mongo-docker-compose up
+
+app-dev:
+	npm run dev
+
+app-dev-run:
+	npm run dev-run
+
+app-test:
+	npm test

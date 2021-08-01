@@ -43,9 +43,21 @@ let sessionSettings: SessionOptions = {
 
 const app = express();
 
-if (process.env.ENVIRONMENT === "prod") {
-    app.set("trust proxy", 1);
-    sessionSettings.cookie!.secure = true;
+switch (process.env.ENVIRONMENT) {
+    case "prod":
+        app.set("trust proxy", 1);
+        sessionSettings.cookie!.secure = true;
+        console.log("Running production environment.");
+        break;
+    case "dev":
+        console.log("Running development environment.");
+        break;
+    case "test":
+        console.log("Running testing environment.");
+        break;
+    default:
+        console.log("Unknown environment name. Exiting...");
+        process.exit(0);
 }
 
 /*
