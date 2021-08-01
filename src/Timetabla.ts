@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import mongoose, { Error } from "mongoose";
+import mongoose, { Error, ObjectId } from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import apiController from "./Api";
@@ -21,7 +21,7 @@ const store: MongoDBStore = new MongoStore({
 declare module "express-session" {
     export interface SessionData {
         user: {
-            id?: string;
+            id?: mongoose.Types.ObjectId;
             username?: string;
             authenticated: boolean;
         };

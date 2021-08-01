@@ -1,5 +1,6 @@
 import UserSchema, { User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
+import mongoose from "mongoose";
 
 class UserService {
     static async saveNew(user: User) {
@@ -15,6 +16,12 @@ class UserService {
         });
 
         await UserSchema.insertMany(users);
+    }
+
+    static async updatePassword(username: string, password: string) {
+        password = hashNew(password);
+
+        await UserSchema.updateOne({ username }, { password });
     }
 }
 

@@ -3,6 +3,7 @@ import UserSchema, { User } from "../../schema/database/UserSchema";
 import LoginCredentials from "../../schema/requestbody/LoginCredentials";
 import { verify } from "../../utils/Hash";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
+import mongoose from "mongoose";
 
 async function loginCredentialsAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     const loginCredentials: LoginCredentials = new LoginCredentials().assign(req.body);

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import randomString from "../../utils/RandomString";
 
 export enum Role {
@@ -14,7 +14,7 @@ export const regex = {
 };
 
 export class User {
-    _id: number;
+    _id: string;
     username: string;
     password: string;
     email: string;
