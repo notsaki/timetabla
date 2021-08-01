@@ -23,6 +23,7 @@ declare module "express-session" {
         user: {
             id?: mongoose.Types.ObjectId;
             username?: string;
+            role: Role;
             authenticated: boolean;
         };
     }

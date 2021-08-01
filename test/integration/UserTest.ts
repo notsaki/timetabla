@@ -1,12 +1,12 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../../src/Timetabla";
-import { User } from "../../src/schema/database/UserSchema";
 import { Done } from "@testdeck/core";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
 import LoginCredentials from "../../src/schema/requestbody/LoginCredentials";
 import UpdatePassword from "../../src/schema/requestbody/UpdatePassword";
+import RegisterUser from "../../src/schema/requestbody/RegisterUser";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -16,12 +16,12 @@ describe("Users", () => {
 
     describe("POST /api/user", () => {
         it("Should save a new user to the database", (done: Done) => {
-            const user = new User().assign({
+            const user: RegisterUser = {
                 username: "user",
                 password: "password",
                 email: "user@domain.com",
                 fullname: "User",
-            });
+            };
 
             chai.request(app)
                 .post("/api/user")
@@ -34,12 +34,12 @@ describe("Users", () => {
         });
 
         it("Username already exists. Should respond with conflict response code", (done: Done) => {
-            const user = new User().assign({
+            const user: RegisterUser = {
                 username: "calandrace",
                 password: "password",
                 email: "user@domain.com",
                 fullname: "User",
-            });
+            };
 
             chai.request(app)
                 .post("/api/user")
@@ -52,12 +52,12 @@ describe("Users", () => {
         });
 
         it("Invalidate username format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user = new User().assign({
+            const user: RegisterUser = {
                 username: "25user",
                 password: "password",
                 email: "user@domain.com",
                 fullname: "User",
-            });
+            };
 
             chai.request(app)
                 .post("/api/user")
@@ -70,12 +70,12 @@ describe("Users", () => {
         });
 
         it("Invalidate email format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user = new User().assign({
+            const user: RegisterUser = {
                 username: "user",
                 password: "password",
                 email: "userdomain.com",
                 fullname: "User",
-            });
+            };
 
             chai.request(app)
                 .post("/api/user")
@@ -88,12 +88,12 @@ describe("Users", () => {
         });
 
         it("Invalidate password format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user = new User().assign({
+            const user: RegisterUser = {
                 username: "user",
                 password: "pass",
                 email: "user@domain.com",
                 fullname: "User",
-            });
+            };
 
             chai.request(app)
                 .post("/api/user")
@@ -119,10 +119,10 @@ describe("Users", () => {
 
     describe("PUT /api/user/password", () => {
         it("Valid old password should return ok and update password sucessfully", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "admin",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -133,10 +133,10 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword = new UpdatePassword().assign({
+                    const updatePassword: UpdatePassword = {
                         oldPassword: loginCredentials.password,
                         newPassword: "new_password",
-                    });
+                    };
 
                     chai.request(app)
                         .put("/api/user/password")
@@ -146,10 +146,10 @@ describe("Users", () => {
                             res.should.have.status(200);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials = new LoginCredentials().assign({
+                            const loginCredentials: LoginCredentials = {
                                 username: "admin",
                                 password: updatePassword.newPassword,
-                            });
+                            };
 
                             chai.request(app)
                                 .post("/api/auth/login")
@@ -164,10 +164,10 @@ describe("Users", () => {
         });
 
         it("Invalid old password should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "admin",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -178,10 +178,10 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword = new UpdatePassword().assign({
+                    const updatePassword: UpdatePassword = {
                         oldPassword: `wrong_${loginCredentials.password}`,
                         newPassword: "new_password",
-                    });
+                    };
 
                     chai.request(app)
                         .put("/api/user/password")
@@ -191,10 +191,10 @@ describe("Users", () => {
                             res.should.have.status(401);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials = new LoginCredentials().assign({
+                            const loginCredentials: LoginCredentials = {
                                 username: "admin",
                                 password: "password",
-                            });
+                            };
 
                             chai.request(app)
                                 .post("/api/auth/login")
@@ -209,10 +209,10 @@ describe("Users", () => {
         });
 
         it("Unauthorised session should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "admin",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -231,10 +231,10 @@ describe("Users", () => {
                             res.should.have.status(200);
                             res.body.should.not.be.empty;
 
-                            const updatePassword = new UpdatePassword().assign({
+                            const updatePassword: UpdatePassword = {
                                 oldPassword: loginCredentials.password,
                                 newPassword: "new_password",
-                            });
+                            };
 
                             chai.request(app)
                                 .put("/api/user/password")
@@ -244,10 +244,10 @@ describe("Users", () => {
                                     res.should.have.status(401);
                                     res.body.should.not.be.empty;
 
-                                    const loginCredentials = new LoginCredentials().assign({
+                                    const loginCredentials: LoginCredentials = {
                                         username: "admin",
                                         password: updatePassword.oldPassword,
-                                    });
+                                    };
 
                                     chai.request(app)
                                         .post("/api/auth/login")
@@ -263,10 +263,10 @@ describe("Users", () => {
         });
 
         it("Short new password should return unprocessable entity and not update password", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "admin",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -277,10 +277,10 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword = new UpdatePassword().assign({
+                    const updatePassword: UpdatePassword = {
                         oldPassword: loginCredentials.password,
                         newPassword: "pass",
-                    });
+                    };
 
                     chai.request(app)
                         .put("/api/user/password")
@@ -290,10 +290,10 @@ describe("Users", () => {
                             res.should.have.status(422);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials = new LoginCredentials().assign({
+                            const loginCredentials: LoginCredentials = {
                                 username: "admin",
                                 password: updatePassword.oldPassword,
-                            });
+                            };
 
                             chai.request(app)
                                 .post("/api/auth/login")
@@ -308,10 +308,10 @@ describe("Users", () => {
         });
 
         it("No session cookie should return unauthorised and not update password", (done: Done) => {
-            const updatePassword = new UpdatePassword().assign({
+            const updatePassword: UpdatePassword = {
                 oldPassword: "password",
                 newPassword: "pass",
-            });
+            };
 
             chai.request(app)
                 .put("/api/user/password")
@@ -320,10 +320,10 @@ describe("Users", () => {
                     res.should.have.status(401);
                     res.body.should.not.be.empty;
 
-                    const loginCredentials = new LoginCredentials().assign({
+                    const loginCredentials: LoginCredentials = {
                         username: "admin",
                         password: updatePassword.oldPassword,
-                    });
+                    };
 
                     chai.request(app)
                         .post("/api/auth/login")

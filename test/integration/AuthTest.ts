@@ -11,10 +11,10 @@ describe("Auth login", () => {
 
     describe("POST /api/auth/login", () => {
         it("Correct username and password should successfully validate user", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "calandrace",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -27,10 +27,10 @@ describe("Auth login", () => {
         });
 
         it("Incorrect username should return unauthorised", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "random_username",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -43,10 +43,10 @@ describe("Auth login", () => {
         });
 
         it("Incorrect password should return unauthorised", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "calandrace",
                 password: "random_password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -70,10 +70,10 @@ describe("Auth login", () => {
         });
 
         it("Unactivated user should return forbidden", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "unactivated_user",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -86,10 +86,10 @@ describe("Auth login", () => {
         });
 
         it("Blocked user should return forbidden", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "blocked_user",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -104,10 +104,10 @@ describe("Auth login", () => {
 
     describe("POST /api/auth/logout", () => {
         it("Authenticated session should return ok", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "calandrace",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")
@@ -144,10 +144,10 @@ describe("Auth login", () => {
         });
 
         it("User who already logged out should return unauthorised", (done: Done) => {
-            const loginCredentials = new LoginCredentials().assign({
+            const loginCredentials: LoginCredentials = {
                 username: "calandrace",
                 password: "password",
-            });
+            };
 
             chai.request(app)
                 .post("/api/auth/login")

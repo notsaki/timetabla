@@ -2,6 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import randomString from "../../utils/RandomString";
 
 export enum Role {
+    Guest,
     Student,
     Professor,
     Admin,
@@ -23,14 +24,6 @@ export class User {
     activationCode?: string = randomString();
     resetCode?: string = undefined;
     blocked: boolean = false;
-
-    assign(user: any): User {
-        this.username = user.username;
-        this.password = user.password;
-        this.email = user.email;
-        this.fullname = user.fullname;
-        return this;
-    }
 }
 
 const schema = new Schema<User>({

@@ -10,14 +10,22 @@ import isAuthenticatedMiddleware from "../middleware/auth/IsAuthenticatedMiddlew
 const userController = Router();
 
 userController.post("/", userValidator, userConflictMiddleware, async (req: Request, res: Response) => {
-    const user: User = new User().assign(req.body);
+    const user: User = req.body;
 
-    let body = new ResponseBody(201, "User created successfully!");
+    let body: ResponseBody = {
+        status: 201,
+        message: "User created successfully!",
+        data: {},
+    };
 
     try {
         await UserService.saveNew(user);
     } catch (error: any) {
-        body = new ResponseBody(500, "Internal server error.");
+        body = {
+            status: 500,
+            message: "Internal server error!",
+            data: {},
+        };
         console.log(error);
     }
 
@@ -30,12 +38,20 @@ userController.put(
     updatePasswordValidator,
     updatePasswordMiddleware,
     async (req: Request, res: Response) => {
-        let body = new ResponseBody(200, "Password updated successfully!");
+        let body: ResponseBody = {
+            status: 200,
+            message: "Password updated successfully!",
+            data: {},
+        };
 
         try {
-            await UserService.updatePassword(req.body.username, req.body.newPassword);
+            await UserService.updatePassword(res.locals.user.username, req.body.newPassword);
         } catch (error: any) {
-            body = new ResponseBody(500, "Internal server error");
+            body = {
+                status: 500,
+                message: "Internal server error!",
+                data: {},
+            };
             console.log(error);
         }
 

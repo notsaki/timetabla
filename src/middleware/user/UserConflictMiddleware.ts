@@ -4,7 +4,11 @@ import ResponseBody from "../../schema/responsebody/ResponseBody";
 
 async function userConflictMiddleware(req: Request, res: Response, next: NextFunction) {
     if (await UserSchema.exists({ username: req.body.username })) {
-        const body = new ResponseBody(409, "Username already exists.");
+        const body: ResponseBody = {
+            status: 409,
+            message: "Username already exists.",
+            data: {},
+        };
 
         res.status(body.status).json(body).send();
         return;

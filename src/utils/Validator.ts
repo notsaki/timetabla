@@ -8,7 +8,11 @@ async function validator(req: Request, res: Response, next: NextFunction, model:
 
     validate(user, { skipMissingProperties: true }).then((error) => {
         if (error.length > 0) {
-            const body = new ResponseBody(422, "Could not process request body.");
+            const body: ResponseBody = {
+                status: 422,
+                message: "Could not process request body.",
+                data: {},
+            };
 
             res.status(body.status).json(body).send();
             return;

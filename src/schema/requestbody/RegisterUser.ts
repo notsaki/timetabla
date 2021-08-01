@@ -21,14 +21,6 @@ class RegisterUser {
     @IsDefined()
     @Expose()
     fullname: string;
-
-    assign(registerUser: any): RegisterUser {
-        this.username = registerUser.username;
-        this.password = registerUser.password;
-        this.email = registerUser.email;
-        this.fullname = registerUser.fullname;
-        return this;
-    }
 }
 
 export default RegisterUser;

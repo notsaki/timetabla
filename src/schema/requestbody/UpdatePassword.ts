@@ -8,12 +8,6 @@ class UpdatePassword {
     @Matches(RegExp(regex.password))
     newPassword: string;
     oldPassword: string;
-
-    assign(updatePassword: any): UpdatePassword {
-        this.newPassword = updatePassword.newPassword;
-        this.oldPassword = updatePassword.oldPassword;
-        return this;
-    }
 }
 
 export default UpdatePassword;
