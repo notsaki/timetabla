@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import loginCredentialsAuthMiddleware from "../auth/LoginCredentialsAuthMiddleware";
-import LoginCredentialsBody from "../../schema/requestbody/LoginCredentialsBody";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
+import LoginCredentialsBody from "../../schema/requestbody/LoginCredentialsBody";
+import loginCredentialsAuthMiddleware from "../auth/LoginCredentialsAuthMiddleware";
 
-async function updatePasswordMiddleware(req: Request, res: Response, next: NextFunction) {
+async function adminPasswordValidationMiddleware(req: Request, res: Response, next: NextFunction) {
     if (!req.session.user) {
         const body: ResponseBody = {
             status: 401,
@@ -17,10 +17,10 @@ async function updatePasswordMiddleware(req: Request, res: Response, next: NextF
 
     const loginCredentials: LoginCredentialsBody = {
         username: req.session.user.username!,
-        password: req.body.oldPassword,
+        password: req.body.adminPassword,
     };
 
     await loginCredentialsAuthMiddleware(loginCredentials, req, res, next);
 }
 
-export default updatePasswordMiddleware;
+export default adminPasswordValidationMiddleware;

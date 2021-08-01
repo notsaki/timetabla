@@ -15,7 +15,7 @@ export const regex = {
 };
 
 export class User {
-    _id: string;
+    _id?: string = undefined;
     username: string;
     password: string;
     email: string;

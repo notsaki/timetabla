@@ -92,16 +92,17 @@ mongoose
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
-                        UserService.saveNew(
-                            new User().assign({
-                                username: process.env.APPLICATION_ADMIN_USERNAME,
-                                password: process.env.APPLICATION_ADMIN_PASSWORD!,
-                                email: process.env.APPLICATION_ADMIN_EMAIL,
-                                fullname: process.env.APPLICATION_ADMIN_FULLNAME,
-                                role: Role.Admin,
-                                activationCode: null,
-                            })
-                        )
+                        UserService.saveNew({
+                            _id: undefined,
+                            username: process.env.APPLICATION_ADMIN_USERNAME!,
+                            password: process.env.APPLICATION_ADMIN_PASSWORD!,
+                            email: process.env.APPLICATION_ADMIN_EMAIL!,
+                            fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
+                            role: Role.Admin,
+                            activationCode: undefined,
+                            blocked: false,
+                            resetCode: undefined,
+                        })
                             .then(() => console.log("Admin user has been created."))
                             .catch((error) => console.log(`Could not create admin user: ${error.message}`));
                     }

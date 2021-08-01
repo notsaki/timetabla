@@ -4,7 +4,7 @@ import loginCredentialsAuthMiddleware from "../middleware/auth/LoginCredentialsA
 import ResponseBody from "../schema/responsebody/ResponseBody";
 import isAuthenticatedMiddleware from "../middleware/auth/IsAuthenticatedMiddleware";
 import { Role } from "../schema/database/UserSchema";
-import LoginCredentials from "../schema/requestbody/LoginCredentials";
+import LoginCredentialsBody from "../schema/requestbody/LoginCredentialsBody";
 
 const authController = Router();
 
@@ -12,7 +12,7 @@ authController.post(
     "/login",
     loginCredentialsValidator,
     async (req: Request, res: Response, next: NextFunction) => {
-        const loginCredentials: LoginCredentials = {
+        const loginCredentials: LoginCredentialsBody = {
             username: req.body.username,
             password: req.body.password,
         };
@@ -23,7 +23,7 @@ authController.post(
         req.session.user = {
             id: res.locals.user._id,
             username: req.body.username,
-            role: req.body.role,
+            role: res.locals.user.role,
             authenticated: true,
         };
 

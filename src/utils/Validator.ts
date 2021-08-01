@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { plainToClass } from "class-transformer";
-import { validate } from "class-validator";
+import { validate, ValidationError } from "class-validator";
 import ResponseBody from "../schema/responsebody/ResponseBody";
 
 async function validator(req: Request, res: Response, next: NextFunction, model: any) {
-    const user = plainToClass(model, req.body);
+    const body: unknown[] = plainToClass(model, req.body);
 
-    validate(user, { skipMissingProperties: true }).then((error) => {
+    validate(body, { skipMissingProperties: true }).then((error: ValidationError[]) => {
         if (error.length > 0) {
             const body: ResponseBody = {
                 status: 422,

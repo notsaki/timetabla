@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import UserSchema, { User } from "../../schema/database/UserSchema";
-import LoginCredentials from "../../schema/requestbody/LoginCredentials";
+import LoginCredentialsBody from "../../schema/requestbody/LoginCredentialsBody";
 import { verify } from "../../utils/Hash";
 import ResponseBody from "../../schema/responsebody/ResponseBody";
 
 async function loginCredentialsAuthMiddleware(
-    loginCredentials: LoginCredentials,
+    loginCredentials: LoginCredentialsBody,
     req: Request,
     res: Response,
     next: NextFunction

@@ -21,11 +21,8 @@ userController.post("/", userValidator, userConflictMiddleware, async (req: Requ
     try {
         await UserService.saveNew(user);
     } catch (error: any) {
-        body = {
-            status: 500,
-            message: "Internal server error!",
-            data: {},
-        };
+        body.status = 500;
+        body.message = "Internal server error!";
         console.log(error);
     }
 

@@ -4,9 +4,9 @@ import app from "../../src/Timetabla";
 import { Done } from "@testdeck/core";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
-import LoginCredentials from "../../src/schema/requestbody/LoginCredentials";
-import UpdatePassword from "../../src/schema/requestbody/UpdatePassword";
-import RegisterUser from "../../src/schema/requestbody/RegisterUser";
+import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
+import UpdatePasswordBody from "../../src/schema/requestbody/UpdatePasswordBody";
+import RegisterUserBody from "../../src/schema/requestbody/RegisterUserBody";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -16,7 +16,7 @@ describe("Users", () => {
 
     describe("POST /api/user", () => {
         it("Should save a new user to the database", (done: Done) => {
-            const user: RegisterUser = {
+            const user: RegisterUserBody = {
                 username: "user",
                 password: "password",
                 email: "user@domain.com",
@@ -34,7 +34,7 @@ describe("Users", () => {
         });
 
         it("Username already exists. Should respond with conflict response code", (done: Done) => {
-            const user: RegisterUser = {
+            const user: RegisterUserBody = {
                 username: "calandrace",
                 password: "password",
                 email: "user@domain.com",
@@ -52,7 +52,7 @@ describe("Users", () => {
         });
 
         it("Invalidate username format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUser = {
+            const user: RegisterUserBody = {
                 username: "25user",
                 password: "password",
                 email: "user@domain.com",
@@ -70,7 +70,7 @@ describe("Users", () => {
         });
 
         it("Invalidate email format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUser = {
+            const user: RegisterUserBody = {
                 username: "user",
                 password: "password",
                 email: "userdomain.com",
@@ -88,7 +88,7 @@ describe("Users", () => {
         });
 
         it("Invalidate password format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUser = {
+            const user: RegisterUserBody = {
                 username: "user",
                 password: "pass",
                 email: "user@domain.com",
@@ -119,7 +119,7 @@ describe("Users", () => {
 
     describe("PUT /api/user/password", () => {
         it("Valid old password should return ok and update password sucessfully", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "admin",
                 password: "password",
             };
@@ -133,7 +133,7 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword: UpdatePassword = {
+                    const updatePassword: UpdatePasswordBody = {
                         oldPassword: loginCredentials.password,
                         newPassword: "new_password",
                     };
@@ -146,7 +146,7 @@ describe("Users", () => {
                             res.should.have.status(200);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials: LoginCredentials = {
+                            const loginCredentials: LoginCredentialsBody = {
                                 username: "admin",
                                 password: updatePassword.newPassword,
                             };
@@ -164,7 +164,7 @@ describe("Users", () => {
         });
 
         it("Invalid old password should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "admin",
                 password: "password",
             };
@@ -178,7 +178,7 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword: UpdatePassword = {
+                    const updatePassword: UpdatePasswordBody = {
                         oldPassword: `wrong_${loginCredentials.password}`,
                         newPassword: "new_password",
                     };
@@ -191,7 +191,7 @@ describe("Users", () => {
                             res.should.have.status(401);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials: LoginCredentials = {
+                            const loginCredentials: LoginCredentialsBody = {
                                 username: "admin",
                                 password: "password",
                             };
@@ -209,7 +209,7 @@ describe("Users", () => {
         });
 
         it("Unauthorised session should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "admin",
                 password: "password",
             };
@@ -231,7 +231,7 @@ describe("Users", () => {
                             res.should.have.status(200);
                             res.body.should.not.be.empty;
 
-                            const updatePassword: UpdatePassword = {
+                            const updatePassword: UpdatePasswordBody = {
                                 oldPassword: loginCredentials.password,
                                 newPassword: "new_password",
                             };
@@ -244,7 +244,7 @@ describe("Users", () => {
                                     res.should.have.status(401);
                                     res.body.should.not.be.empty;
 
-                                    const loginCredentials: LoginCredentials = {
+                                    const loginCredentials: LoginCredentialsBody = {
                                         username: "admin",
                                         password: updatePassword.oldPassword,
                                     };
@@ -263,7 +263,7 @@ describe("Users", () => {
         });
 
         it("Short new password should return unprocessable entity and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "admin",
                 password: "password",
             };
@@ -277,7 +277,7 @@ describe("Users", () => {
 
                     const sessionCookie: string = res.get("Set-Cookie")[0];
 
-                    const updatePassword: UpdatePassword = {
+                    const updatePassword: UpdatePasswordBody = {
                         oldPassword: loginCredentials.password,
                         newPassword: "pass",
                     };
@@ -290,7 +290,7 @@ describe("Users", () => {
                             res.should.have.status(422);
                             res.body.should.not.be.empty;
 
-                            const loginCredentials: LoginCredentials = {
+                            const loginCredentials: LoginCredentialsBody = {
                                 username: "admin",
                                 password: updatePassword.oldPassword,
                             };
@@ -308,7 +308,7 @@ describe("Users", () => {
         });
 
         it("No session cookie should return unauthorised and not update password", (done: Done) => {
-            const updatePassword: UpdatePassword = {
+            const updatePassword: UpdatePasswordBody = {
                 oldPassword: "password",
                 newPassword: "pass",
             };
@@ -320,7 +320,7 @@ describe("Users", () => {
                     res.should.have.status(401);
                     res.body.should.not.be.empty;
 
-                    const loginCredentials: LoginCredentials = {
+                    const loginCredentials: LoginCredentialsBody = {
                         username: "admin",
                         password: updatePassword.oldPassword,
                     };

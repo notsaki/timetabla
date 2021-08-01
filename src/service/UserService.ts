@@ -23,6 +23,10 @@ class UserService {
 
         await UserSchema.updateOne({ username }, { password });
     }
+
+    static async updateUsername(username: string, newUsername: string) {
+        await UserSchema.updateOne({ username }, { username: newUsername });
+    }
 }
 
 export default UserService;

@@ -1,17 +1,20 @@
 import chai from "chai";
 import { Done } from "@testdeck/core";
 import app from "../../src/Timetabla";
-import LoginCredentials from "../../src/schema/requestbody/LoginCredentials";
+import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
+import chaiHttp from "chai-http";
 const should = chai.should();
+
+chai.use(chaiHttp);
 
 describe("Auth login", () => {
     beforeEach(resetUserCollectionState);
 
     describe("POST /api/auth/login", () => {
         it("Correct username and password should successfully validate user", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "calandrace",
                 password: "password",
             };
@@ -27,7 +30,7 @@ describe("Auth login", () => {
         });
 
         it("Incorrect username should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "random_username",
                 password: "password",
             };
@@ -43,7 +46,7 @@ describe("Auth login", () => {
         });
 
         it("Incorrect password should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "calandrace",
                 password: "random_password",
             };
@@ -70,7 +73,7 @@ describe("Auth login", () => {
         });
 
         it("Unactivated user should return forbidden", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "unactivated_user",
                 password: "password",
             };
@@ -86,7 +89,7 @@ describe("Auth login", () => {
         });
 
         it("Blocked user should return forbidden", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "blocked_user",
                 password: "password",
             };
@@ -104,7 +107,7 @@ describe("Auth login", () => {
 
     describe("POST /api/auth/logout", () => {
         it("Authenticated session should return ok", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "calandrace",
                 password: "password",
             };
@@ -144,7 +147,7 @@ describe("Auth login", () => {
         });
 
         it("User who already logged out should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentials = {
+            const loginCredentials: LoginCredentialsBody = {
                 username: "calandrace",
                 password: "password",
             };

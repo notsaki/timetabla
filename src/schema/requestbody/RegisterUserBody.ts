@@ -2,7 +2,7 @@ import { IsDefined, Matches } from "class-validator";
 import { Expose } from "class-transformer";
 import { regex } from "../database/UserSchema";
 
-class RegisterUser {
+class RegisterUserBody {
     @IsDefined()
     @Expose()
     @Matches(RegExp(regex.username))
@@ -23,4 +23,4 @@ class RegisterUser {
     fullname: string;
 }
 
-export default RegisterUser;
+export default RegisterUserBody;
