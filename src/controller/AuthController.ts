@@ -1,16 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { loginCredentialsValidator } from "../middleware/ValidatorMiddleware";
+import { loginCredentialsSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
 import ResponseBody from "../schema/responsebody/ResponseBody";
-import isAuthenticatedMid from "../middleware/auth/IsAuthenticatedMid";
+import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { Role } from "../schema/database/UserSchema";
-import loginCredentialsVerifyMid from "../middleware/auth/LoginCredentialsVerifyMid";
+import verifyLoginCredentialsMid from "../middleware/VerifyLoginCredentialsMid";
 
 const authController = Router();
 
 authController.post(
     "/login",
-    loginCredentialsValidator,
-    loginCredentialsVerifyMid,
+    loginCredentialsSchemaValidator,
+    verifyLoginCredentialsMid,
     async (req: Request, res: Response) => {
         req.session.user = {
             id: res.locals.user._id,

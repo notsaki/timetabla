@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response, Router } from "express";
 import UserService from "../service/UserService";
 import ResponseBody from "../schema/responsebody/ResponseBody";
-import { adminUpdateUsernameValidator } from "../middleware/ValidatorMiddleware";
+import { adminRequestBodySchemaValidator } from "../middleware/SchemaValidatorMiddleware";
+import { adminUpdateUsernameConflictMid } from "../middleware/UserConflictMid";
+import { adminUpdateUsernameUserExistsMid } from "../middleware/UserExistsMid";
 
 const adminController = Router();
 
 adminController.put(
     "/user/:username/username",
-    adminUpdateUsernameValidator,
-    async (req: Request, res: Response, next: NextFunction) => {
+    adminRequestBodySchemaValidator,
+    adminUpdateUsernameUserExistsMid,
+    adminUpdateUsernameConflictMid,
+    async (req: Request, res: Response) => {
         let body: ResponseBody = {
             status: 200,
             message: "Username updated successfully!",

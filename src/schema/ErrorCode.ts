@@ -3,6 +3,7 @@ enum ErrorCode {
     EntityNotFound,
     InvalidPassword,
     UserNotVerified,
+    EntityConflict,
 }
 
 export default ErrorCode;

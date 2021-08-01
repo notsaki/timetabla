@@ -1,15 +1,15 @@
 import { Request, Response, Router } from "express";
-import { updatePasswordValidator, userValidator } from "../middleware/ValidatorMiddleware";
+import { updatePasswordSchemaValidator, userSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
 import { User } from "../schema/database/UserSchema";
-import userConflictMiddleware from "../middleware/user/UserConflictMiddleware";
 import UserService from "../service/UserService";
 import ResponseBody from "../schema/responsebody/ResponseBody";
-import updatePasswordMiddleware from "../middleware/user/UpdatePasswordMiddleware";
-import isAuthenticatedMid from "../middleware/auth/IsAuthenticatedMid";
+import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
+import { verifyLoginCredentialsUpdatePasswordMid } from "../middleware/VerifyLoginCredentialsMid";
+import { userConflictMid } from "../middleware/UserConflictMid";
 
 const userController = Router();
 
-userController.post("/", userValidator, userConflictMiddleware, async (req: Request, res: Response) => {
+userController.post("/", userSchemaValidator, userConflictMid, async (req: Request, res: Response) => {
     const user: User = req.body;
 
     let body: ResponseBody = {
@@ -32,8 +32,8 @@ userController.post("/", userValidator, userConflictMiddleware, async (req: Requ
 userController.put(
     "/password",
     isAuthenticatedMid,
-    updatePasswordValidator,
-    updatePasswordMiddleware,
+    updatePasswordSchemaValidator,
+    verifyLoginCredentialsUpdatePasswordMid,
     async (req: Request, res: Response) => {
         let body: ResponseBody = {
             status: 200,
@@ -42,7 +42,7 @@ userController.put(
         };
 
         try {
-            await UserService.updatePassword(res.locals.user.username, req.body.newPassword);
+            await UserService.updatePassword(req.session.user!.username!, req.body.newPassword);
         } catch (error: any) {
             body = {
                 status: 500,
