@@ -1,4 +1,4 @@
-import UserSchema, { User } from "../schema/database/UserSchema";
+import UserSchema, { Role, User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
 import mongoose from "mongoose";
 
@@ -26,6 +26,22 @@ class UserService {
 
     static async updateUsername(username: string, newUsername: string) {
         await UserSchema.updateOne({ username }, { username: newUsername });
+    }
+
+    static async updateEmail(username: string, email: string) {
+        await UserSchema.updateOne({ username }, { email });
+    }
+
+    static async updateFullname(username: string, fullname: string) {
+        await UserSchema.updateOne({ username }, { fullname });
+    }
+
+    static async updateBlocked(username: string, blocked: boolean) {
+        await UserSchema.updateOne({ username }, { blocked });
+    }
+
+    static async updateRole(username: string, role: Role) {
+        await UserSchema.updateOne({ username }, { role });
     }
 }
 

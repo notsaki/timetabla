@@ -8,8 +8,15 @@ import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsB
 import userLogin, { adminLogin, getSessionId, headAdminLogin } from "utils/UserLogin";
 import RegisterUserBody from "../../src/schema/requestbody/RegisterUserBody";
 import AdminRequestBody from "../../src/schema/requestbody/admin/AdminRequestBody";
-import UserSchema, { Role } from "../../src/schema/database/UserSchema";
-import AdminUpdateUsernameBody from "../../src/schema/requestbody/admin/AdminUpdateUsernameBody";
+import UserSchema, { Role, User } from "../../src/schema/database/UserSchema";
+import {
+    AdminBlockUserBody,
+    AdminUpdateFullnameBody,
+    AdminUpdateUserEmailBody,
+    AdminUpdateUsernameBody,
+    AdminUpdateUserPasswordBody,
+    AdminUpdateUserRoleBody,
+} from "../../src/schema/requestbody/admin/AdminUpdateUsernameBody";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -421,6 +428,133 @@ describe("Admin", () => {
 
                         UserSchema.exists({ username: updateUsernameBody.data.newUsername }).then((res: boolean) => {
                             expect(res).to.be.true;
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    describe("PUT /api/admin/user/:username/fullname", () => {
+        it("Admin updating user's fullname should return ok", (done: Done) => {
+            const body: AdminRequestBody<AdminUpdateFullnameBody> = {
+                adminPassword: "password",
+                data: { newFullname: "New Fullname" },
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .put("/api/admin/user/calandrace/fullname")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        UserSchema.findOne({ username: "calandrace" }).then((user: User) => {
+                            expect(user.fullname).to.be.equals(body.data.newFullname);
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    describe("PUT /api/admin/user/:username/password", () => {
+        it("Admin updating user's password should return ok", (done: Done) => {
+            const body: AdminRequestBody<AdminUpdateUserPasswordBody> = {
+                adminPassword: "password",
+                data: { newPassword: "new_password" },
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .put("/api/admin/user/calandrace/password")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        userLogin("calandrace", body.data.newPassword).then((res: Response) => {
+                            res.should.have.status(200);
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    describe("PUT /api/admin/user/:username/role", () => {
+        it("Admin updating user's password should return ok", (done: Done) => {
+            const body: AdminRequestBody<AdminUpdateUserRoleBody> = {
+                adminPassword: "password",
+                data: { newRole: Role.Admin },
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .put("/api/admin/user/calandrace/role")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        UserSchema.exists({ username: "calandrace", role: body.data.newRole }).then((res: boolean) => {
+                            expect(res).to.be.true;
+                            done();
+                        });
+                    });
+            });
+        });
+    });
+
+    describe("PUT /api/admin/user/:username/email", () => {
+        it("Admin updating user's email should return ok", (done: Done) => {
+            const body: AdminRequestBody<AdminUpdateUserEmailBody> = {
+                adminPassword: "password",
+                data: { newEmail: "new_email@timetabla.com" },
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .put("/api/admin/user/calandrace/email")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        UserSchema.exists({ username: "calandrace", email: body.data.newEmail }).then(
+                            (res: boolean) => {
+                                expect(res).to.be.true;
+                                done();
+                            }
+                        );
+                    });
+            });
+        });
+    });
+
+    describe("PUT /api/admin/user/:username/block", () => {
+        it("Admin updating user's email should return ok", (done: Done) => {
+            const body: AdminRequestBody<AdminBlockUserBody> = {
+                adminPassword: "password",
+                data: { block: true },
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .put("/api/admin/user/calandrace/block")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        userLogin("calandrace", "password").then((res: Response) => {
+                            res.should.have.status(403);
                             done();
                         });
                     });
