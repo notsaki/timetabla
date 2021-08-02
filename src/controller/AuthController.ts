@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { loginCredentialsSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
-import ResponseBody from "../schema/responsebody/ResponseBody";
 import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { Role } from "../schema/database/UserSchema";
 import verifyLoginCredentialsMid from "../middleware/VerifyLoginCredentialsMid";
+import ResponseHandler from "../utils/SendResponse";
 
 const authController = Router();
 
@@ -19,13 +19,7 @@ authController.post(
             authenticated: true,
         };
 
-        const body: ResponseBody = {
-            status: 200,
-            message: "User authenticated!",
-            data: {},
-        };
-
-        res.status(body.status).json(body).send();
+        ResponseHandler.sendOk(res, "User authenticated!");
     }
 );
 
@@ -37,13 +31,7 @@ authController.post("/logout", isAuthenticatedMid, (req: Request, res: Response)
         authenticated: false,
     };
 
-    const body: ResponseBody = {
-        status: 200,
-        message: "Logout successful!",
-        data: {},
-    };
-
-    res.status(body.status).json(body).send();
+    ResponseHandler.sendOk(res, "Logout successful!");
 });
 
 export default authController;

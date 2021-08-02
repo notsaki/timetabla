@@ -98,7 +98,7 @@ mongoose
                             password: process.env.APPLICATION_ADMIN_PASSWORD!,
                             email: process.env.APPLICATION_ADMIN_EMAIL!,
                             fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
-                            role: Role.Admin,
+                            role: Role.HeadAdmin,
                             activationCode: undefined,
                             blocked: false,
                             resetCode: undefined,

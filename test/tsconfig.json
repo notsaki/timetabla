@@ -9,7 +9,7 @@
         "strict": false,
         "noImplicitAny": false,
         "typeRoots" : ["../node_modules/@types"],
-        "types": ["mocha"]
+        "types": ["mocha", "superagent"]
     },
     "exclude": ["../node_modules"],
     "include": ["../**/*.ts"]

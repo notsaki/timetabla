@@ -6,6 +6,26 @@
         "email": "admin@timetabla.com",
         "activationCode": null,
         "resetCode": null,
+        "role": 4,
+        "blocked": false
+    },
+    {
+        "username": "secretary_office",
+        "password": "password",
+        "fullname": "Secretary Office",
+        "email": "secretary_office@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 3,
+        "blocked": false
+    },
+    {
+        "username": "secretary_office_2",
+        "password": "password",
+        "fullname": "Secretary Office 2",
+        "email": "secretary_office_2@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
         "role": 3,
         "blocked": false
     },

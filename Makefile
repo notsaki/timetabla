@@ -1,4 +1,4 @@
-docker-dir = docker/
+docker-dir = docker/ENVIRONMENT=test
 
 mongo-docker-compose = $(docker-dir)docker-compose.mongo.yml
 

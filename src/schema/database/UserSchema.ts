@@ -6,6 +6,7 @@ export enum Role {
     Student,
     Professor,
     Admin,
+    HeadAdmin,
 }
 
 export const regex = {

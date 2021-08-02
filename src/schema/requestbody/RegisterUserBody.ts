@@ -1,6 +1,6 @@
 import { IsDefined, Matches } from "class-validator";
 import { Expose } from "class-transformer";
-import { regex } from "../database/UserSchema";
+import { regex, Role } from "../database/UserSchema";
 
 class RegisterUserBody {
     @IsDefined()
@@ -21,6 +21,10 @@ class RegisterUserBody {
     @IsDefined()
     @Expose()
     fullname: string;
+
+    @IsDefined()
+    @Expose()
+    role: Role;
 }
 
 export default RegisterUserBody;

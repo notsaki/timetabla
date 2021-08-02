@@ -1,16 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import ResponseBody from "../schema/responsebody/ResponseBody";
 import authenticatedSession from "../utils/AuthenticatedSession";
+import ResponseHandler from "../utils/SendResponse";
 
 function isAuthenticatedMid(req: Request, res: Response, next: NextFunction) {
     if (!authenticatedSession(req.session)) {
-        const body: ResponseBody = {
-            status: 401,
-            message: "User not authenticated. Please login.",
-            data: {},
-        };
-
-        res.status(body.status).json(body).send();
+        ResponseHandler.sendUnauthorised(res, "User not authenticated. Please login.");
         return;
     }
 

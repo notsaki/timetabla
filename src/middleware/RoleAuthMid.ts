@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { Role } from "../schema/database/UserSchema";
 import ResponseBody from "../schema/responsebody/ResponseBody";
 import roleAuthenticator from "../utils/RoleAuthenticator";
+import sendResponse from "../utils/SendResponse";
+import ResponseHandler from "../utils/SendResponse";
 
 export function adminRoleAuthMid(req: Request, res: Response, next: NextFunction) {
     roleAuthMid(Role.Admin, req, res, next);
@@ -17,13 +19,7 @@ export function studentRoleAuthMid(req: Request, res: Response, next: NextFuncti
 
 function roleAuthMid(role: Role, req: Request, res: Response, next: NextFunction) {
     if (!roleAuthenticator(req.session.user!.role, role)) {
-        const body: ResponseBody = {
-            status: 401,
-            message: "User's role is not authorised for this request.",
-            data: {},
-        };
-
-        res.status(body.status).json(body).send();
+        ResponseHandler.sendUnauthorised(res, "User's role is not authorised for this request.");
         return;
     }
 

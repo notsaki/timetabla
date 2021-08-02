@@ -1,16 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import UserSchema from "../schema/database/UserSchema";
-import ResponseBody from "../schema/responsebody/ResponseBody";
+import ResponseHandler from "../utils/SendResponse";
 
 async function userConflictHandler(username: string, req: Request, res: Response, next: NextFunction) {
     if (await UserSchema.exists({ username })) {
-        const body: ResponseBody = {
-            status: 409,
-            message: "Username already exists.",
-            data: {},
-        };
-
-        res.status(body.status).json(body).send();
+        ResponseHandler.sendConflict(res, "Username already exists.");
         return;
     }
 
@@ -22,5 +16,5 @@ export async function adminUpdateUsernameConflictMid(req: Request, res: Response
 }
 
 export async function userConflictMid(req: Request, res: Response, next: NextFunction) {
-    await userConflictHandler(req.body.username, req, res, next);
+    await userConflictHandler(req.body.data.username, req, res, next);
 }

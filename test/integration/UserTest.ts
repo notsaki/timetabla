@@ -6,116 +6,12 @@ import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
 import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import UpdatePasswordBody from "../../src/schema/requestbody/UpdatePasswordBody";
-import RegisterUserBody from "../../src/schema/requestbody/RegisterUserBody";
 const should = chai.should();
 
 chai.use(chaiHttp);
 
 describe("Users", () => {
     beforeEach(resetUserCollectionState);
-
-    describe("POST /api/user", () => {
-        it("Should save a new user to the database", (done: Done) => {
-            const user: RegisterUserBody = {
-                username: "user",
-                password: "password",
-                email: "user@domain.com",
-                fullname: "User",
-            };
-
-            chai.request(app)
-                .post("/api/user")
-                .send(user)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(201);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-
-        it("Username already exists. Should respond with conflict response code", (done: Done) => {
-            const user: RegisterUserBody = {
-                username: "calandrace",
-                password: "password",
-                email: "user@domain.com",
-                fullname: "User",
-            };
-
-            chai.request(app)
-                .post("/api/user")
-                .send(user)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(409);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-
-        it("Invalidate username format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUserBody = {
-                username: "25user",
-                password: "password",
-                email: "user@domain.com",
-                fullname: "User",
-            };
-
-            chai.request(app)
-                .post("/api/user")
-                .send(user)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(422);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-
-        it("Invalidate email format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUserBody = {
-                username: "user",
-                password: "password",
-                email: "userdomain.com",
-                fullname: "User",
-            };
-
-            chai.request(app)
-                .post("/api/user")
-                .send(user)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(422);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-
-        it("Invalidate password format. Should respond with unprocessable entity response code", (done: Done) => {
-            const user: RegisterUserBody = {
-                username: "user",
-                password: "pass",
-                email: "user@domain.com",
-                fullname: "User",
-            };
-
-            chai.request(app)
-                .post("/api/user")
-                .send(user)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(422);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-
-        it("Invalid json format. Should respond with bad request", (done: Done) => {
-            chai.request(app)
-                .post("/api/user")
-                .send('{"username":"user')
-                .end((error: any, res: Response) => {
-                    res.should.have.status(422);
-                    res.body.should.be.not.empty;
-                    done();
-                });
-        });
-    });
 
     describe("PUT /api/user/password", () => {
         it("Valid old password should return ok and update password sucessfully", (done: Done) => {
