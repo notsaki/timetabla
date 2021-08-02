@@ -561,4 +561,29 @@ describe("Admin", () => {
             });
         });
     });
+
+    describe("DELETE /api/admin/user/:username", () => {
+        it("Admin deleting user should return ok", (done: Done) => {
+            const body: AdminRequestBody<any> = {
+                adminPassword: "password",
+                data: {},
+            };
+
+            adminLogin().then((res: Response) => {
+                chai.request(app)
+                    .delete("/api/admin/user/calandrace")
+                    .set("Cookie", getSessionId(res))
+                    .send(body)
+                    .end((error: any, res: Response) => {
+                        res.should.have.status(200);
+                        res.body.should.be.not.empty;
+
+                        UserSchema.exists({ username: "clandrace" }).then((res: boolean) => {
+                            expect(res).to.be.false;
+                            done();
+                        });
+                    });
+            });
+        });
+    });
 });

@@ -18,6 +18,10 @@ class UserService {
         await UserSchema.insertMany(users);
     }
 
+    static async deleteOne(username: string) {
+        await UserSchema.deleteOne({ username });
+    }
+
     static async updatePassword(username: string, password: string) {
         password = hashNew(password);
 
