@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import schemaValidator, { validatorHandler } from "../utils/SchemaValidator";
+import schemaValidator from "../utils/SchemaValidator";
 import RegisterUserBody from "../schema/requestbody/RegisterUserBody";
 import UpdatePasswordBody from "../schema/requestbody/UpdatePasswordBody";
 import LoginCredentialsBody from "../schema/requestbody/LoginCredentialsBody";

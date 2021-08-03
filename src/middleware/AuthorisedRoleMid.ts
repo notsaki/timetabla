@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import UserSchema, { Role, User } from "../schema/database/UserSchema";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 import roleAuthMid from "./RoleAuthMid";
 
 export function userCreationAuthorisedRoleMid(req: Request, res: Response, next: NextFunction) {

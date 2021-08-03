@@ -9,7 +9,7 @@ import insertTestData from "../test/utils/InsertTestData";
 import session, { SessionOptions } from "express-session";
 import UserService from "./service/UserService";
 import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
-import { setResMid } from "./utils/SendResponse";
+import setHandlers from "./middleware/SetHandlers";
 
 const PORT = 8080;
 
@@ -69,7 +69,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session(sessionSettings));
-app.use(setResMid);
+app.use(setHandlers);
 
 /*
  * Controllers

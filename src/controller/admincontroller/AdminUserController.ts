@@ -16,7 +16,7 @@ import {
     adminUpdateUpdateUserAuthorisedRoleMid,
     userCreationAuthorisedRoleMid,
 } from "../../middleware/AuthorisedRoleMid";
-import ResponseHandler from "../../utils/SendResponse";
+import ResponseHandler from "../../utils/ResponseHandler";
 import Mailer from "../../utils/Mailer";
 
 const adminUserController = Router();

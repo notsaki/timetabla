@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import UserSchema from "../schema/database/UserSchema";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 
 async function userConflictHandler(username: string, req: Request, res: Response, next: NextFunction) {
     if (await UserSchema.exists({ username })) {

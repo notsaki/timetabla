@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 import UserService from "../service/UserService";
 
 async function usernameExistsHandler(username: string, req: Request, res: Response, next: NextFunction) {

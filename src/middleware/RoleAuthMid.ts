@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Role } from "../schema/database/UserSchema";
 import roleAuthenticator from "../utils/RoleAuthenticator";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 
 export function adminRoleAuthMid(req: Request, res: Response, next: NextFunction) {
     roleAuthMid(Role.Admin, req, res, next);

@@ -4,7 +4,7 @@ import ResponseBody from "../schema/responsebody/ResponseBody";
 class ResponseHandler {
     static res: Response;
 
-    constructor(res: Response) {
+    static setResponse(res: Response) {
         ResponseHandler.res = res;
     }
 

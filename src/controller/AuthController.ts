@@ -1,9 +1,9 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import { loginCredentialsSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
 import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { Role } from "../schema/database/UserSchema";
 import verifyLoginCredentialsMid from "../middleware/VerifyLoginCredentialsMid";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 
 const authController = Router();
 

@@ -3,7 +3,7 @@ import { passwordResetSchemaValidator, updatePasswordSchemaValidator } from "../
 import { verifyLoginCredentialsUpdatePasswordMid } from "../middleware/VerifyLoginCredentialsMid";
 import { Request, Response, Router } from "express";
 import UserService from "../service/UserService";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 import { User } from "../schema/database/UserSchema";
 import Mailer from "../utils/Mailer";
 import {

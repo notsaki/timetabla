@@ -1,7 +1,7 @@
 import { Request, NextFunction, Response } from "express";
 import { User } from "../schema/database/UserSchema";
 import UserService from "../service/UserService";
-import ResponseHandler from "../utils/SendResponse";
+import ResponseHandler from "../utils/ResponseHandler";
 
 export async function resetCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
     const user: User | null = await UserService.findOne(req.params.username);
