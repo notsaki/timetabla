@@ -13,6 +13,6 @@ async function usernameExistsHandler(username: string, req: Request, res: Respon
     next();
 }
 
-export async function adminUpdateUserUsernameExists(req: Request, res: Response, next: NextFunction) {
+export async function usernameExistsMid(req: Request, res: Response, next: NextFunction) {
     await usernameExistsHandler(req.params.username, req, res, next);
 }

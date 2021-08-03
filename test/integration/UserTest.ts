@@ -1,4 +1,4 @@
-import chai from "chai";
+import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
 import app from "../../src/Timetabla";
 import { Done } from "@testdeck/core";
@@ -6,6 +6,10 @@ import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
 import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import UpdatePasswordBody from "../../src/schema/requestbody/UpdatePasswordBody";
+import createUser, { defaultUserBody } from "../utils/CreateUser";
+import UserSchema, { User } from "../../src/schema/database/UserSchema";
+import userLogin from "../utils/UserLogin";
+import UserService from "../../src/service/UserService";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -230,6 +234,126 @@ describe("Users", () => {
                             done();
                         });
                 });
+        });
+    });
+
+    describe("GET /api/user/:username/activate/:activationcode", () => {
+        it("Should create a user and activate them", async () => {
+            await createUser();
+
+            const user: User = await UserService.findOne(defaultUserBody.username);
+
+            let res: Response = await chai
+                .request(app)
+                .get(`/api/user/${defaultUserBody.username}/activate/${user.activationCode}`)
+                .send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            res = await userLogin(defaultUserBody.username, defaultUserBody.password);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+        });
+
+        it("Create a user and send invalid activation code should return unauthorised", async () => {
+            await createUser();
+
+            const user: User = await UserService.findOne(defaultUserBody.username);
+
+            let res: Response = await chai
+                .request(app)
+                .get(`/api/user/${defaultUserBody.username}/activate/${user.activationCode}_invalid`)
+                .send();
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+
+            res = await userLogin(defaultUserBody.username, defaultUserBody.password);
+
+            res.should.have.status(403);
+            res.body.should.be.not.empty;
+        });
+
+        it("Sending activation code for a wrong user should return unauthorised", async () => {
+            const user: User = await UserService.findOne("unactivated_user_2");
+
+            let res: Response = await chai
+                .request(app)
+                .get(`/api/user/unactivated_user/activate/${user.activationCode}_invalid`)
+                .send();
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+
+            res = await userLogin("unactivated_user_2", "password");
+
+            res.should.have.status(403);
+            res.body.should.be.not.empty;
+        });
+
+        it("Sending activation code for non-existant user should return not found", async () => {
+            const username = "unactivated_user";
+
+            const user: User = await UserService.findOne(username);
+
+            let res: Response = await chai
+                .request(app)
+                .get(`/api/user/nonexistent_username/activate/${user.activationCode}`)
+                .send();
+
+            res.should.have.status(404);
+            res.body.should.be.not.empty;
+        });
+    });
+
+    describe("POST /api/user/:username/reset", () => {
+        it("Should request a new reset code for a user and return ok", async () => {
+            const username = "berriesgrease";
+
+            const res: Response = await chai.request(app).post(`/api/user/${username}/reset`).send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            const user: User = await UserService.findOne(username);
+
+            expect(user.resetCode).to.not.be.null;
+        });
+
+        it("Should request a new reset code for a non-existent user and return not found", async () => {
+            const username = "berriesgrease_2";
+
+            const res: Response = await chai.request(app).post(`/api/user/${username}/reset`).send();
+
+            res.should.have.status(404);
+            res.body.should.be.not.empty;
+        });
+
+        it("Requesting a new reset code twice should re-create reset code", async () => {
+            const username = "berriesgrease";
+
+            let res: Response = await chai.request(app).post(`/api/user/${username}/reset`).send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            let user: User = await UserService.findOne(username);
+
+            expect(user.resetCode).to.be.not.null;
+
+            const oldResetCode = user.resetCode;
+
+            res = await chai.request(app).post(`/api/user/${username}/reset`).send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            user = await UserService.findOne(username);
+
+            expect(user.resetCode).to.be.not.null;
+            expect(user.resetCode).to.be.not.equals(oldResetCode);
         });
     });
 });

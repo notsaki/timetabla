@@ -11,7 +11,8 @@ import {
     AdminUpdateUsernameBody,
     AdminUpdateUserPasswordBody,
     AdminUpdateUserRoleBody,
-} from "../schema/requestbody/admin/AdminUpdateUsernameBody";
+} from "../schema/requestbody/admin/AdminUpdateUserBody";
+import PasswordResetBody from "../schema/requestbody/PasswordResetBody";
 
 export async function userSchemaValidator(req: Request, res: Response, next: NextFunction) {
     await schemaValidator(req.body.data, res, next, RegisterUserBody);
@@ -23,6 +24,10 @@ export async function loginCredentialsSchemaValidator(req: Request, res: Respons
 
 export async function updatePasswordSchemaValidator(req: Request, res: Response, next: NextFunction) {
     await schemaValidator(req.body, res, next, UpdatePasswordBody);
+}
+
+export async function passwordResetSchemaValidator(req: Request, res: Response, next: NextFunction) {
+    await schemaValidator(req.body, res, next, PasswordResetBody);
 }
 
 export async function adminRequestBodySchemaValidator(req: Request, res: Response, next: NextFunction) {

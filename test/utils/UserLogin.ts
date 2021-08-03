@@ -1,7 +1,8 @@
-import chai, { expect } from "chai";
+import chai from "chai";
 import chaiHttp from "chai-http";
 import app from "../../src/Timetabla";
 import { Response } from "superagent";
+
 const should = chai.should();
 
 chai.use(chaiHttp);

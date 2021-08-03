@@ -8,15 +8,16 @@ import {
     adminUpdateUsernameSchemaValidator,
     userSchemaValidator,
 } from "../../middleware/SchemaValidatorMiddleware";
-import { User } from "../../schema/database/UserSchema";
+import UserSchema, { User } from "../../schema/database/UserSchema";
 import UserService from "../../service/UserService";
 import { adminUpdateUsernameConflictMid, userConflictMid } from "../../middleware/UserConflictMid";
-import { adminUpdateUserUsernameExists } from "../../middleware/UserExistsMid";
+import { usernameExistsMid } from "../../middleware/UserExistsMid";
 import {
     adminUpdateUpdateUserAuthorisedRoleMid,
     userCreationAuthorisedRoleMid,
 } from "../../middleware/AuthorisedRoleMid";
 import ResponseHandler from "../../utils/SendResponse";
+import Mailer from "../../utils/Mailer";
 
 const adminUserController = Router();
 
@@ -36,13 +37,17 @@ adminUserController.post(
             return;
         }
 
+        UserService.findOne(user.username).then((user: User | null) => {
+            Mailer.sendVerificationEmail(user!.email, user!.username, user!.activationCode!);
+        });
+
         ResponseHandler.sendResponse(res, 201, "User created successfully!");
     }
 );
 
 adminUserController.delete(
     "/:username",
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         try {
@@ -59,7 +64,7 @@ adminUserController.delete(
 adminUserController.put(
     "/:username/username",
     adminUpdateUsernameSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     adminUpdateUsernameConflictMid,
     async (req: Request, res: Response) => {
@@ -77,7 +82,7 @@ adminUserController.put(
 adminUserController.put(
     "/:username/fullname",
     adminUpdateFullnameSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         try {
@@ -94,7 +99,7 @@ adminUserController.put(
 adminUserController.put(
     "/:username/password",
     adminUpdatePasswordSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         try {
@@ -111,7 +116,7 @@ adminUserController.put(
 adminUserController.put(
     "/:username/email",
     adminUpdateEmailSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         try {
@@ -128,7 +133,7 @@ adminUserController.put(
 adminUserController.put(
     "/:username/role",
     adminUpdateRoleSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         try {
@@ -145,7 +150,7 @@ adminUserController.put(
 adminUserController.put(
     "/:username/block",
     adminBlockUserSchemaValidator,
-    adminUpdateUserUsernameExists,
+    usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     async (req: Request, res: Response) => {
         const blocked: boolean = req.body.data.block;

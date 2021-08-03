@@ -1,4 +1,4 @@
-docker-dir = docker/ENVIRONMENT=test
+docker-dir = docker/
 
 mongo-docker-compose = $(docker-dir)docker-compose.mongo.yml
 
@@ -14,11 +14,14 @@ up:
 mongo-build: set-mongo-docker-compose build
 mongo-up: set-mongo-docker-compose up
 
-app-dev:
+dev:
 	npm run dev
 
-app-dev-run:
+dev-run:
 	npm run dev-run
 
 app-test:
 	npm test
+
+test-file:
+	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha 'test/**/$(F).ts'

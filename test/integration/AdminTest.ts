@@ -16,7 +16,7 @@ import {
     AdminUpdateUsernameBody,
     AdminUpdateUserPasswordBody,
     AdminUpdateUserRoleBody,
-} from "../../src/schema/requestbody/admin/AdminUpdateUsernameBody";
+} from "../../src/schema/requestbody/admin/AdminUpdateUserBody";
 const should = chai.should();
 
 chai.use(chaiHttp);

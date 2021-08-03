@@ -1,0 +1,31 @@
+import { Request, NextFunction, Response } from "express";
+import { User } from "../schema/database/UserSchema";
+import UserService from "../service/UserService";
+import ResponseHandler from "../utils/SendResponse";
+
+export async function resetCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
+    const user: User | null = await UserService.findOne(req.params.username);
+
+    if (user!.resetCode !== req.params.resetcode) {
+        ResponseHandler.sendUnauthorised(res, "Invalid reset code.");
+        return;
+    }
+
+    next();
+}
+
+export async function activationCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
+    const user: User | null = await UserService.findOne(req.params.username);
+
+    if (!user) {
+        ResponseHandler.sendNotFound(res, "User not found.");
+        return;
+    }
+
+    if (user.activationCode !== req.params.activationcode) {
+        ResponseHandler.sendUnauthorised(res, "Invalid activation code.");
+        return;
+    }
+
+    next();
+}

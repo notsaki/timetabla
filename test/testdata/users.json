@@ -120,6 +120,16 @@
         "blocked": false
     },
     {
+        "username": "unactivated_user_2",
+        "password": "password",
+        "fullname": "Unactivated User 2",
+        "email": "unactivated.user.2@timetabla.com",
+        "activationCode": "44c4e10d8ffec350343f59b319189f2b8e22d30eaa0bca1eaa3bef6011f92ffe",
+        "resetCode": null,
+        "role": 1,
+        "blocked": false
+    },
+    {
         "username": "reset_code_user",
         "password": "password",
         "fullname": "Reset Code User",

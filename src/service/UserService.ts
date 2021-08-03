@@ -1,6 +1,7 @@
 import UserSchema, { Role, User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
 import mongoose from "mongoose";
+import randomString from "../utils/RandomString";
 
 class UserService {
     static async saveNew(user: User) {
@@ -20,6 +21,10 @@ class UserService {
 
     static async deleteOne(username: string) {
         await UserSchema.deleteOne({ username });
+    }
+
+    static async findOne(username: string): Promise<User | null> {
+        return UserSchema.findOne({ username });
     }
 
     static async updatePassword(username: string, password: string) {
@@ -46,6 +51,18 @@ class UserService {
 
     static async updateRole(username: string, role: Role) {
         await UserSchema.updateOne({ username }, { role });
+    }
+
+    static async createResetCode(username: string) {
+        await UserSchema.updateOne({ username }, { resetCode: randomString() });
+    }
+
+    static async resetResetCode(username: string) {
+        await UserSchema.updateOne({ username }, { resetCode: undefined });
+    }
+
+    static async resetActivationCode(username: string) {
+        await UserSchema.updateOne({ username }, { activationCode: undefined });
     }
 }
 
