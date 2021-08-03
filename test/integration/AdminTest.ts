@@ -1,10 +1,8 @@
 import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
 import app from "../../src/Timetabla";
-import { Done } from "@testdeck/core";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
-import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import userLogin, { adminLogin, getSessionId, headAdminLogin } from "utils/UserLogin";
 import RegisterUserBody from "../../src/schema/requestbody/RegisterUserBody";
 import AdminRequestBody from "../../src/schema/requestbody/admin/AdminRequestBody";
@@ -17,6 +15,7 @@ import {
     AdminUpdateUserPasswordBody,
     AdminUpdateUserRoleBody,
 } from "../../src/schema/requestbody/admin/AdminUpdateUserBody";
+import UserService from "../../src/service/UserService";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -25,138 +24,12 @@ describe("Admin", () => {
     beforeEach(resetUserCollectionState);
 
     describe("POST /api/admin/user", () => {
-        it("Should save a new user to the database", (done: Done) => {
-            adminLogin().then((res: Response) => {
-                res.should.have.status(200);
-                res.body.should.be.not.empty;
+        it("Should save a new user to the database", async function () {
+            let res: Response = await adminLogin();
 
-                const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
-                    adminPassword: "password",
-                    data: {
-                        username: "user",
-                        password: "password",
-                        email: "user@domain.com",
-                        fullname: "User",
-                        role: Role.Student,
-                    },
-                };
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
 
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(201);
-                        res.body.should.be.not.empty;
-
-                        UserSchema.exists({ username: "user" }, (error: any, res: boolean) => {
-                            expect(res).to.be.true;
-                            done();
-                        });
-                    });
-            });
-        });
-
-        it("Username already exists. Should respond with conflict response code", (done: Done) => {
-            adminLogin().then((res: Response) => {
-                const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
-                    adminPassword: "password",
-                    data: {
-                        username: "calandrace",
-                        password: "password",
-                        email: "user@domain.com",
-                        fullname: "User",
-                        role: Role.Professor,
-                    },
-                };
-
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(409);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
-        });
-
-        it("Invalid username format. Should respond with unprocessable entity response code", (done: Done) => {
-            adminLogin().then((res: Response) => {
-                const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
-                    adminPassword: "password",
-                    data: {
-                        username: "25user",
-                        password: "password",
-                        email: "user@domain.com",
-                        fullname: "User",
-                        role: Role.Student,
-                    },
-                };
-
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(422);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
-        });
-
-        it("Invalid email format. Should respond with unprocessable entity response code", (done: Done) => {
-            adminLogin().then((res: Response) => {
-                const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
-                    adminPassword: "password",
-                    data: {
-                        username: "user",
-                        password: "password",
-                        email: "userdomain.com",
-                        fullname: "User",
-                        role: Role.Student,
-                    },
-                };
-
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(422);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
-        });
-        it("Invalid password format. Should respond with unprocessable entity response code", (done: Done) => {
-            adminLogin().then((res: Response) => {
-                const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
-                    adminPassword: "password",
-                    data: {
-                        username: "user",
-                        password: "pass",
-                        email: "user@domain.com",
-                        fullname: "User",
-                        role: Role.Student,
-                    },
-                };
-
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(422);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
-        });
-
-        it("Unauthorised session should return unauthorised", (done: Done) => {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -168,34 +41,151 @@ describe("Admin", () => {
                 },
             };
 
-            userLogin("berriesgrease", "password").then((res: Response) => {
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(401);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(201);
+            res.body.should.be.not.empty;
+
+            expect(await UserSchema.exists({ username: "user" })).to.be.true;
         });
 
-        it("Authorised non admin session should return unauthorised", (done: Done) => {
-            userLogin("calandrace", "password").then((res: Response) => {
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send('{"username":"user')
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(401);
-                        res.body.should.be.not.empty;
-                        done();
-                    });
-            });
+        it("Username already exists. Should respond with conflict response code", async function () {
+            let res: Response = await adminLogin();
+
+            const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
+                adminPassword: "password",
+                data: {
+                    username: "calandrace",
+                    password: "password",
+                    email: "user@domain.com",
+                    fullname: "User",
+                    role: Role.Professor,
+                },
+            };
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(409);
+            res.body.should.be.not.empty;
         });
 
-        it("Head admin creating a head admin user should return unauthorised", (done: Done) => {
+        it("Invalid username format. Should respond with unprocessable entity response code", async function () {
+            let res: Response = await adminLogin();
+
+            const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
+                adminPassword: "password",
+                data: {
+                    username: "25user",
+                    password: "password",
+                    email: "user@domain.com",
+                    fullname: "User",
+                    role: Role.Student,
+                },
+            };
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(422);
+            res.body.should.be.not.empty;
+        });
+
+        it("Invalid email format. Should respond with unprocessable entity response code", async function () {
+            let res: Response = await adminLogin();
+
+            const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
+                adminPassword: "password",
+                data: {
+                    username: "user",
+                    password: "password",
+                    email: "userdomain.com",
+                    fullname: "User",
+                    role: Role.Student,
+                },
+            };
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(422);
+            res.body.should.be.not.empty;
+        });
+        it("Invalid password format. Should respond with unprocessable entity response code", async function () {
+            let res: Response = await adminLogin();
+
+            const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
+                adminPassword: "password",
+                data: {
+                    username: "user",
+                    password: "pass",
+                    email: "user@domain.com",
+                    fullname: "User",
+                    role: Role.Student,
+                },
+            };
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(422);
+            res.body.should.be.not.empty;
+        });
+
+        it("Unauthorised session should return unauthorised", async function () {
+            const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
+                adminPassword: "password",
+                data: {
+                    username: "user",
+                    password: "password",
+                    email: "user@domain.com",
+                    fullname: "User",
+                    role: Role.Student,
+                },
+            };
+
+            let res: Response = await userLogin("berriesgrease", "password");
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+        });
+
+        it("Authorised non admin session should return unauthorised", async function () {
+            let res: Response = await userLogin("calandrace", "password");
+
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send('{"username":"user');
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+        });
+
+        it("Head admin creating a head admin user should return unauthorised", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -207,24 +197,21 @@ describe("Admin", () => {
                 },
             };
 
-            headAdminLogin().then((res: Response) => {
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(401);
-                        res.body.should.be.not.empty;
+            let res: Response = await headAdminLogin();
 
-                        UserSchema.exists({ username: adminCreateUserBody.data.username }).then((res: boolean) => {
-                            expect(res).to.be.false;
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(adminCreateUserBody.data.username)).to.be.false;
         });
 
-        it("Head admin creating an admin user should return created", (done: Done) => {
+        it("Head admin creating an admin user should return created", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -236,24 +223,20 @@ describe("Admin", () => {
                 },
             };
 
-            headAdminLogin().then((res: Response) => {
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(201);
-                        res.body.should.be.not.empty;
+            let res: Response = await headAdminLogin();
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
 
-                        UserSchema.exists({ username: "new_admin" }).then((res: boolean) => {
-                            expect(res).to.be.true;
-                            done();
-                        });
-                    });
-            });
+            res.should.have.status(201);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists("new_admin")).to.be.true;
         });
 
-        it("Admin creating an admin user should return unauthorised", (done: Done) => {
+        it("Admin creating an admin user should return unauthorised", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -265,126 +248,90 @@ describe("Admin", () => {
                 },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .post("/api/admin/user")
-                    .set("Cookie", getSessionId(res))
-                    .send(adminCreateUserBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(401);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        UserSchema.exists({ username: adminCreateUserBody.data.username }).then((res: boolean) => {
-                            expect(res).to.be.false;
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .post("/api/admin/user")
+                .set("Cookie", getSessionId(res))
+                .send(adminCreateUserBody);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(adminCreateUserBody.data.username)).to.be.false;
         });
     });
 
     describe("PUT /api/admin/user/:username/username", () => {
-        it("Admin role and valid password should return ok and update user's username", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
+        it("Admin role and valid password should return ok and update user's username", async function () {
+            let res: Response = await adminLogin();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            const newUsername = "new_massrarely";
+
+            const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
+                adminPassword: "password",
+                data: { newUsername },
             };
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.be.not.empty;
+            res = await chai
+                .request(app)
+                .put("/api/admin/user/massrarely/username")
+                .set("Cookie", getSessionId(res))
+                .send(adminUpdateUsernameBody);
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
 
-                    const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
-                        adminPassword: loginCredentials.password,
-                        data: { newUsername: "new_massrarely" },
-                    };
-
-                    chai.request(app)
-                        .put("/api/admin/user/massrarely/username")
-                        .set("Cookie", sessionCookie)
-                        .send(adminUpdateUsernameBody)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
-                            res.body.should.be.not.empty;
-
-                            UserSchema.exists({ username: "new_massrarely" }, (error: any, res: boolean) => {
-                                expect(res).to.be.true;
-                                done();
-                            });
-                        });
-                });
+            expect(await UserService.exists(newUsername)).to.be.true;
         });
 
-        it("Non existent user should return not found", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
+        it("Non existent user should return not found", async function () {
+            let res: Response = await adminLogin();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
+                adminPassword: "password",
+                data: { newUsername: "new_massrarely" },
             };
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.be.not.empty;
+            res = await chai
+                .request(app)
+                .put("/api/admin/user/non_massrarely/username")
+                .set("Cookie", getSessionId(res))
+                .send(adminUpdateUsernameBody);
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
-                        adminPassword: loginCredentials.password,
-                        data: { newUsername: "new_massrarely" },
-                    };
-
-                    chai.request(app)
-                        .put("/api/admin/user/non_massrarely/username")
-                        .set("Cookie", sessionCookie)
-                        .send(adminUpdateUsernameBody)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(404);
-                            res.body.should.be.not.empty;
-                            done();
-                        });
-                });
+            res.should.have.status(404);
+            res.body.should.be.not.empty;
         });
 
-        it("Existent new username should return conflict", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
+        it("Existent new username should return conflict", async function () {
+            let res: Response = await adminLogin();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
+                adminPassword: "password",
+                data: { newUsername: "admin" },
             };
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.be.not.empty;
+            res = await chai
+                .request(app)
+                .put("/api/admin/user/massrarely/username")
+                .set("Cookie", getSessionId(res))
+                .send(adminUpdateUsernameBody);
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
-                        adminPassword: loginCredentials.password,
-                        data: { newUsername: "admin" },
-                    };
-
-                    chai.request(app)
-                        .put("/api/admin/user/massrarely/username")
-                        .set("Cookie", sessionCookie)
-                        .send(adminUpdateUsernameBody)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(409);
-                            res.body.should.be.not.empty;
-                            done();
-                        });
-                });
+            res.should.have.status(409);
+            res.body.should.be.not.empty;
         });
 
-        it("Admin should not be able to update another admin's username", (done: Done) => {
+        it("Admin should not be able to update another admin's username", async function () {
             const updateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
                 data: {
@@ -392,197 +339,188 @@ describe("Admin", () => {
                 },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/secretary_office_2/username")
-                    .set("Cookie", getSessionId(res))
-                    .send(updateUsernameBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(401);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        UserSchema.exists({ username: "secretary_office_2" }).then((res: boolean) => {
-                            expect(res).to.be.true;
-                            done();
-                        });
-                    });
-            });
+            const adminUsername = "secretary_office_2";
+
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${adminUsername}/username`)
+                .set("Cookie", getSessionId(res))
+                .send(updateUsernameBody);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(adminUsername)).to.be.true;
         });
 
-        it("Head admin should be able to update another admin's username", (done: Done) => {
+        it("Head admin should be able to update another admin's username", async function () {
+            const newUsername = "new_admin_username";
+
             const updateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
-                data: {
-                    newUsername: "new_admin_username",
-                },
+                data: { newUsername },
             };
 
-            headAdminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/secretary_office_2/username")
-                    .set("Cookie", getSessionId(res))
-                    .send(updateUsernameBody)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await headAdminLogin();
 
-                        UserSchema.exists({ username: updateUsernameBody.data.newUsername }).then((res: boolean) => {
-                            expect(res).to.be.true;
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put("/api/admin/user/secretary_office_2/username")
+                .set("Cookie", getSessionId(res))
+                .send(updateUsernameBody);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(newUsername)).to.be.true;
         });
     });
 
     describe("PUT /api/admin/user/:username/fullname", () => {
-        it("Admin updating user's fullname should return ok", (done: Done) => {
+        it("Admin updating user's fullname should return ok", async function () {
+            const username = "calandrace";
+            const newFullname = "New Fullname";
+
             const body: AdminRequestBody<AdminUpdateFullnameBody> = {
                 adminPassword: "password",
-                data: { newFullname: "New Fullname" },
+                data: { newFullname },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/calandrace/fullname")
-                    .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        UserSchema.findOne({ username: "calandrace" }).then((user: User) => {
-                            expect(user.fullname).to.be.equals(body.data.newFullname);
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${username}/fullname`)
+                .set("Cookie", getSessionId(res))
+                .send(body);
+
+            expect((await UserService.findOne(username)).fullname).to.be.equals(newFullname);
         });
     });
 
     describe("PUT /api/admin/user/:username/password", () => {
-        it("Admin updating user's password should return ok", (done: Done) => {
+        it("Admin updating user's password should return ok", async function () {
+            const username = "calandrace";
+            const newPassword = "new_password";
+
             const body: AdminRequestBody<AdminUpdateUserPasswordBody> = {
                 adminPassword: "password",
-                data: { newPassword: "new_password" },
+                data: { newPassword },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/calandrace/password")
-                    .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        userLogin("calandrace", body.data.newPassword).then((res: Response) => {
-                            res.should.have.status(200);
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${username}/password`)
+                .set("Cookie", getSessionId(res))
+                .send(body);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            res = await userLogin(username, newPassword);
+
+            res.should.have.status(200);
         });
     });
 
     describe("PUT /api/admin/user/:username/role", () => {
-        it("Admin updating user's password should return ok", (done: Done) => {
+        it("Admin updating user's password should return ok", async function () {
+            const username = "calandrace";
+
             const body: AdminRequestBody<AdminUpdateUserRoleBody> = {
                 adminPassword: "password",
                 data: { newRole: Role.Admin },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/calandrace/role")
-                    .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        UserSchema.exists({ username: "calandrace", role: body.data.newRole }).then((res: boolean) => {
-                            expect(res).to.be.true;
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${username}/role`)
+                .set("Cookie", getSessionId(res))
+                .send(body);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(username)).to.be.true;
         });
     });
 
     describe("PUT /api/admin/user/:username/email", () => {
-        it("Admin updating user's email should return ok", (done: Done) => {
+        it("Admin updating user's email should return ok", async function () {
+            const username = "calandrace";
+
             const body: AdminRequestBody<AdminUpdateUserEmailBody> = {
                 adminPassword: "password",
                 data: { newEmail: "new_email@timetabla.com" },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/calandrace/email")
-                    .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        UserSchema.exists({ username: "calandrace", email: body.data.newEmail }).then(
-                            (res: boolean) => {
-                                expect(res).to.be.true;
-                                done();
-                            }
-                        );
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${username}/email`)
+                .set("Cookie", getSessionId(res))
+                .send(body);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            expect(await UserService.exists(username)).to.be.true;
         });
     });
 
     describe("PUT /api/admin/user/:username/block", () => {
-        it("Admin updating user's email should return ok", (done: Done) => {
+        it("Admin blocking user should return ok and user login should return forbidden", async function () {
+            const username = "calandrace";
+
             const body: AdminRequestBody<AdminBlockUserBody> = {
                 adminPassword: "password",
                 data: { block: true },
             };
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .put("/api/admin/user/calandrace/block")
-                    .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+            let res: Response = await adminLogin();
 
-                        userLogin("calandrace", "password").then((res: Response) => {
-                            res.should.have.status(403);
-                            done();
-                        });
-                    });
-            });
+            res = await chai
+                .request(app)
+                .put(`/api/admin/user/${username}/block`)
+                .set("Cookie", getSessionId(res))
+                .send(body);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            res = await userLogin(username, "password");
+
+            res.should.have.status(403);
         });
-    });
 
-    describe("DELETE /api/admin/user/:username", () => {
-        it("Admin deleting user should return ok", (done: Done) => {
-            const body: AdminRequestBody<any> = {
-                adminPassword: "password",
-                data: {},
-            };
+        describe("DELETE /api/admin/user/:username", () => {
+            it("Admin deleting user should return ok", async function () {
+                const username = "calandrace";
 
-            adminLogin().then((res: Response) => {
-                chai.request(app)
-                    .delete("/api/admin/user/calandrace")
+                const body: AdminRequestBody<any> = {
+                    adminPassword: "password",
+                    data: {},
+                };
+
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .delete(`/api/admin/user/${username}`)
                     .set("Cookie", getSessionId(res))
-                    .send(body)
-                    .end((error: any, res: Response) => {
-                        res.should.have.status(200);
-                        res.body.should.be.not.empty;
+                    .send(body);
 
-                        UserSchema.exists({ username: "clandrace" }).then((res: boolean) => {
-                            expect(res).to.be.false;
-                            done();
-                        });
-                    });
+                res.should.have.status(200);
+                res.body.should.be.not.empty;
+
+                expect(await UserService.exists(username)).to.be.false;
             });
         });
     });

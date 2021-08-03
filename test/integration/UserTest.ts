@@ -1,14 +1,13 @@
 import chai, { expect } from "chai";
 import chaiHttp from "chai-http";
 import app from "../../src/Timetabla";
-import { Done } from "@testdeck/core";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
 import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import UpdatePasswordBody from "../../src/schema/requestbody/UpdatePasswordBody";
 import createUser, { defaultUserBody } from "../utils/CreateUser";
-import UserSchema, { User } from "../../src/schema/database/UserSchema";
-import userLogin from "../utils/UserLogin";
+import { User } from "../../src/schema/database/UserSchema";
+import userLogin, { adminLogin, getSessionId } from "../utils/UserLogin";
 import UserService from "../../src/service/UserService";
 import PasswordResetBody from "../../src/schema/requestbody/PasswordResetBody";
 const should = chai.should();
@@ -19,223 +18,147 @@ describe("Users", () => {
     beforeEach(resetUserCollectionState);
 
     describe("PUT /api/user/password", () => {
-        it("Valid old password should return ok and update password sucessfully", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
-            };
+        it("Valid old password should return ok and update password successfully", async function () {
+            let res: Response = await adminLogin();
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.not.be.empty;
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    const updatePassword: UpdatePasswordBody = {
-                        oldPassword: loginCredentials.password,
-                        newPassword: "new_password",
-                    };
-
-                    chai.request(app)
-                        .put("/api/user/password")
-                        .set("Cookie", sessionCookie)
-                        .send(updatePassword)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
-                            res.body.should.not.be.empty;
-
-                            const loginCredentials: LoginCredentialsBody = {
-                                username: "admin",
-                                password: updatePassword.newPassword,
-                            };
-
-                            chai.request(app)
-                                .post("/api/auth/login")
-                                .send(loginCredentials)
-                                .end((error: any, res: Response) => {
-                                    res.should.have.status(200);
-                                    res.body.should.not.be.empty;
-                                    done();
-                                });
-                        });
-                });
-        });
-
-        it("Invalid old password should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
-            };
-
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.not.be.empty;
-
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    const updatePassword: UpdatePasswordBody = {
-                        oldPassword: `wrong_${loginCredentials.password}`,
-                        newPassword: "new_password",
-                    };
-
-                    chai.request(app)
-                        .put("/api/user/password")
-                        .set("Cookie", sessionCookie)
-                        .send(updatePassword)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(401);
-                            res.body.should.not.be.empty;
-
-                            const loginCredentials: LoginCredentialsBody = {
-                                username: "admin",
-                                password: "password",
-                            };
-
-                            chai.request(app)
-                                .post("/api/auth/login")
-                                .send(loginCredentials)
-                                .end((error: any, res: Response) => {
-                                    res.should.have.status(200);
-                                    res.body.should.not.be.empty;
-                                    done();
-                                });
-                        });
-                });
-        });
-
-        it("Unauthorised session should return unauthorised and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
-            };
-
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.not.be.empty;
-
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    chai.request(app)
-                        .post("/api/auth/logout")
-                        .set("Cookie", sessionCookie)
-                        .send()
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
-                            res.body.should.not.be.empty;
-
-                            const updatePassword: UpdatePasswordBody = {
-                                oldPassword: loginCredentials.password,
-                                newPassword: "new_password",
-                            };
-
-                            chai.request(app)
-                                .put("/api/user/password")
-                                .set("Cookie", sessionCookie)
-                                .send(updatePassword)
-                                .end((error: any, res: Response) => {
-                                    res.should.have.status(401);
-                                    res.body.should.not.be.empty;
-
-                                    const loginCredentials: LoginCredentialsBody = {
-                                        username: "admin",
-                                        password: updatePassword.oldPassword,
-                                    };
-
-                                    chai.request(app)
-                                        .post("/api/auth/login")
-                                        .send(loginCredentials)
-                                        .end((error: any, res: Response) => {
-                                            res.should.have.status(200);
-                                            res.body.should.not.be.empty;
-                                            done();
-                                        });
-                                });
-                        });
-                });
-        });
-
-        it("Short new password should return unprocessable entity and not update password", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "admin",
-                password: "password",
-            };
-
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.not.be.empty;
-
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
-
-                    const updatePassword: UpdatePasswordBody = {
-                        oldPassword: loginCredentials.password,
-                        newPassword: "pass",
-                    };
-
-                    chai.request(app)
-                        .put("/api/user/password")
-                        .set("Cookie", sessionCookie)
-                        .send(updatePassword)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(422);
-                            res.body.should.not.be.empty;
-
-                            const loginCredentials: LoginCredentialsBody = {
-                                username: "admin",
-                                password: updatePassword.oldPassword,
-                            };
-
-                            chai.request(app)
-                                .post("/api/auth/login")
-                                .send(loginCredentials)
-                                .end((error: any, res: Response) => {
-                                    res.should.have.status(200);
-                                    res.body.should.not.be.empty;
-                                    done();
-                                });
-                        });
-                });
-        });
-
-        it("No session cookie should return unauthorised and not update password", (done: Done) => {
             const updatePassword: UpdatePasswordBody = {
                 oldPassword: "password",
-                newPassword: "pass",
+                newPassword: "new_password",
             };
 
-            chai.request(app)
+            res = await chai
+                .request(app)
                 .put("/api/user/password")
-                .send(updatePassword)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(401);
-                    res.body.should.not.be.empty;
+                .set("Cookie", getSessionId(res))
+                .send(updatePassword);
 
-                    const loginCredentials: LoginCredentialsBody = {
-                        username: "admin",
-                        password: updatePassword.oldPassword,
-                    };
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
 
-                    chai.request(app)
-                        .post("/api/auth/login")
-                        .send(loginCredentials)
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
-                            res.body.should.not.be.empty;
-                            done();
-                        });
-                });
+            res = await userLogin("secretary_office", updatePassword.newPassword);
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
         });
+
+        it("Invalid old password should return unauthorised and not update password", async function () {
+            let res: Response = await adminLogin();
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
+
+            const updatePassword: UpdatePasswordBody = {
+                oldPassword: "wrong_password",
+                newPassword: "new_password",
+            };
+
+            res = await chai
+                .request(app)
+                .put("/api/user/password")
+                .set("Cookie", getSessionId(res))
+                .send(updatePassword);
+
+            res.should.have.status(401);
+            res.body.should.not.be.empty;
+
+            const loginCredentials: LoginCredentialsBody = {
+                username: "admin",
+                password: "password",
+            };
+
+            res = await chai.request(app).post("/api/auth/login").send(loginCredentials);
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
+        });
+
+        it("Unauthorised session should return unauthorised and not update password", async function () {
+            let res: Response = await adminLogin();
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
+
+            res = await chai.request(app).post("/api/auth/logout").set("Cookie", getSessionId(res)).send();
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
+
+            const updatePassword: UpdatePasswordBody = {
+                oldPassword: "password",
+                newPassword: "new_password",
+            };
+
+            res = await chai
+                .request(app)
+                .put("/api/user/password")
+                .set("Cookie", getSessionId(res))
+                .send(updatePassword);
+
+            res.should.have.status(401);
+            res.body.should.not.be.empty;
+
+            const loginCredentials: LoginCredentialsBody = {
+                username: "admin",
+                password: updatePassword.oldPassword,
+            };
+
+            res = await chai.request(app).post("/api/auth/login").send(loginCredentials);
+
+            res.should.have.status(200);
+            res.body.should.not.be.empty;
+        });
+    });
+
+    it("Short new password should return unprocessable entity and not update password", async function () {
+        let res: Response = await adminLogin();
+
+        res.should.have.status(200);
+        res.body.should.not.be.empty;
+
+        const updatePassword: UpdatePasswordBody = {
+            oldPassword: "password",
+            newPassword: "pass",
+        };
+
+        res = await chai.request(app).put("/api/user/password").set("Cookie", getSessionId(res)).send(updatePassword);
+
+        res.should.have.status(422);
+        res.body.should.not.be.empty;
+
+        const loginCredentials: LoginCredentialsBody = {
+            username: "admin",
+            password: updatePassword.oldPassword,
+        };
+
+        res = await chai.request(app).post("/api/auth/login").send(loginCredentials);
+
+        res.should.have.status(200);
+        res.body.should.not.be.empty;
+    });
+
+    it("No session cookie should return unauthorised and not update password", async function () {
+        const updatePassword: UpdatePasswordBody = {
+            oldPassword: "password",
+            newPassword: "pass",
+        };
+
+        let res = await chai.request(app).put("/api/user/password").send(updatePassword);
+
+        res.should.have.status(401);
+        res.body.should.not.be.empty;
+
+        const loginCredentials: LoginCredentialsBody = {
+            username: "admin",
+            password: updatePassword.oldPassword,
+        };
+
+        res = await chai.request(app).post("/api/auth/login").send(loginCredentials);
+
+        res.should.have.status(200);
+        res.body.should.not.be.empty;
     });
 
     describe("GET /api/user/:username/activate/:activationcode", () => {
@@ -366,12 +289,10 @@ describe("Users", () => {
             expect(user.resetCode).to.be.not.null;
             expect(user.resetCode).to.be.not.equals(oldResetCode);
         });
-
-
     });
 
-    describe("POST /api/user/:username/reset/:resetcode", function() {
-        it("Request a new reset code and reset password. Should return ok", async function() {
+    describe("POST /api/user/:username/reset/:resetcode", function () {
+        it("Request a new reset code and reset password. Should return ok", async function () {
             const username = "berriesgrease";
 
             let res: Response = await chai.request(app).post(`/api/user/${username}/reset`).send();
@@ -396,7 +317,7 @@ describe("Users", () => {
             res.body.should.be.not.empty;
         });
 
-        it("Sending reset code for non-existent user should return not found", async function() {
+        it("Sending reset code for non-existent user should return not found", async function () {
             let user: User = await UserService.findOne("reset_code_user");
 
             expect(user.resetCode).to.be.not.null;
@@ -412,12 +333,15 @@ describe("Users", () => {
             res.body.should.be.not.empty;
         });
 
-        it("Sending invalid reset code for non-existent user should return unauthorised", async function() {
+        it("Sending invalid reset code for non-existent user should return unauthorised", async function () {
             const resetCode = "1d6f9ca63eba57ee2197edcaa4a33e8ba13445d61402a9b31fd0c6b9e1c75dc9$";
 
             const resetPasswordBody: PasswordResetBody = { newPassword: "new_password" };
 
-            const res: Response = await chai.request(app).post(`/api/user/reset_code_user/reset/${resetCode}`).send(resetPasswordBody);
+            const res: Response = await chai
+                .request(app)
+                .post(`/api/user/reset_code_user/reset/${resetCode}`)
+                .send(resetPasswordBody);
 
             res.should.have.status(401);
             res.body.should.be.not.empty;

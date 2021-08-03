@@ -8,21 +8,15 @@ import { Role } from "../../src/schema/database/UserSchema";
 const should = chai.should();
 
 describe("Error code parser", () => {
-    it("Should authenticate admin", (done) => {
+    it("Should authenticate admin", function () {
         expect(roleAuthenticator(Role.Admin, Role.Admin)).to.be.true;
-
-        done();
     });
 
-    it("Should authenticate admin", (done) => {
+    it("Should authenticate admin", function () {
         expect(roleAuthenticator(Role.Admin, Role.Student)).to.be.true;
-
-        done();
     });
 
-    it("Should not authenticate guest", (done) => {
+    it("Should not authenticate guest", function () {
         expect(roleAuthenticator(Role.Guest, Role.Student)).to.be.false;
-
-        done();
     });
 });

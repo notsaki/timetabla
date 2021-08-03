@@ -1,10 +1,9 @@
 import chai from "chai";
-import { Done } from "@testdeck/core";
 import app from "../../src/Timetabla";
-import LoginCredentialsBody from "../../src/schema/requestbody/LoginCredentialsBody";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../utils/BeforeEach";
 import chaiHttp from "chai-http";
+import userLogin, { getSessionId } from "../utils/UserLogin";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -13,172 +12,106 @@ describe("Auth login", () => {
     beforeEach(resetUserCollectionState);
 
     describe("POST /api/auth/login", () => {
-        it("Correct username and password should successfully validate user", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "calandrace",
-                password: "password",
-            };
+        it("Correct username and password should successfully validate user", async function () {
+            const username = "calandrace";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+            let res: Response = await userLogin(username, password);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
         });
 
-        it("Incorrect username should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "random_username",
-                password: "password",
-            };
+        it("Incorrect username should return unauthorised", async function () {
+            const username = "random_username";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(401);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+            let res: Response = await userLogin(username, password);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
         });
 
-        it("Incorrect password should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "calandrace",
-                password: "random_password",
-            };
+        it("Incorrect password should return unauthorised", async function () {
+            const username = "calandrace";
+            const password = "random_password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(401);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+            let res: Response = await userLogin(username, password);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
         });
 
-        it("Invalid json should return unprocessable entity", (done: Done) => {
-            chai.request(app)
-                .post("/api/auth/login")
-                .send('{"username":"test"')
-                .end((error: any, res: Response) => {
-                    res.should.have.status(422);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+        it("Invalid json should return unprocessable entity", async function () {
+            const res: Response = await chai.request(app).post("/api/auth/login").send('{"username":"test"');
+
+            res.should.have.status(422);
+            res.body.should.be.not.empty;
         });
 
-        it("Unactivated user should return forbidden", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "unactivated_user",
-                password: "password",
-            };
+        it("Unactivated user should return forbidden", async function () {
+            const username = "unactivated_user";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(403);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+            let res: Response = await userLogin(username, password);
+
+            res.should.have.status(403);
+            res.body.should.be.not.empty;
         });
 
-        it("Blocked user should return forbidden", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "blocked_user",
-                password: "password",
-            };
+        it("Blocked user should return forbidden", async function () {
+            const username = "blocked_user";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(403);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+            let res: Response = await userLogin(username, password);
+
+            res.should.have.status(403);
+            res.body.should.be.not.empty;
         });
     });
 
     describe("POST /api/auth/logout", () => {
-        it("Authenticated session should return ok", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "calandrace",
-                password: "password",
-            };
+        it("Authenticated session should return ok", async function () {
+            const username = "calandrace";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.should.have.cookie("user");
+            let res: Response = await userLogin(username, password);
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
+            res.should.have.status(200);
+            res.should.have.cookie("user");
 
-                    chai.request(app)
-                        .post("/api/auth/logout")
-                        .set("Cookie", sessionCookie)
-                        .send()
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
-                            res.body.should.be.not.empty;
-                            done();
-                        });
-                });
+            chai.request(app).post("/api/auth/logout").set("Cookie", getSessionId(res)).send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
         });
     });
 
     describe("POST /api/auth/logout", () => {
-        it("Non-authenticated session should return unauthorised", (done: Done) => {
-            chai.request(app)
-                .post("/api/auth/logout")
-                .send()
-                .end((error: any, res: Response) => {
-                    res.should.have.status(401);
-                    res.body.should.be.not.empty;
-                    done();
-                });
+        it("Non-authenticated session should return unauthorised", async function () {
+            const res: Response = await chai.request(app).post("/api/auth/logout").send();
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
         });
 
-        it("User who already logged out should return unauthorised", (done: Done) => {
-            const loginCredentials: LoginCredentialsBody = {
-                username: "calandrace",
-                password: "password",
-            };
+        it("User who already logged out should return unauthorised", async function () {
+            const username = "calandrace";
+            const password = "password";
 
-            chai.request(app)
-                .post("/api/auth/login")
-                .send(loginCredentials)
-                .end((error: any, res: Response) => {
-                    res.should.have.status(200);
-                    res.should.have.cookie("user");
+            let res: Response = await userLogin(username, password);
 
-                    const sessionCookie: string = res.get("Set-Cookie")[0];
+            res.should.have.status(200);
+            res.should.have.cookie("user");
 
-                    chai.request(app)
-                        .post("/api/auth/logout")
-                        .set("Cookie", sessionCookie)
-                        .send()
-                        .end((error: any, res: Response) => {
-                            res.should.have.status(200);
+            res = await chai.request(app).post("/api/auth/logout").set("Cookie", getSessionId(res)).send();
 
-                            chai.request(app)
-                                .post("/api/auth/logout")
-                                .set("Cookie", sessionCookie)
-                                .send()
-                                .end((error: any, res: Response) => {
-                                    res.should.have.status(401);
-                                    res.body.should.be.not.empty;
-                                    done();
-                                });
-                        });
-                });
+            res.should.have.status(200);
+
+            res = await chai.request(app).post("/api/auth/logout").set("Cookie", getSessionId(res)).send();
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
         });
     });
 });

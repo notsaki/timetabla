@@ -5,15 +5,13 @@ import BlockedUserError from "../../src/error/BlockedUserError";
 const should = chai.should();
 
 describe("Error code parser", () => {
-    it(`Should parse ${ErrorCode.BlockedUser}`, (done) => {
+    it(`Should parse ${ErrorCode.BlockedUser}`, function () {
         try {
             throw new BlockedUserError();
         } catch (error: any) {
             const errorCode = getErrorCode(error);
 
             expect(errorCode).to.equal(ErrorCode.BlockedUser);
-
-            done();
         }
     });
 });
