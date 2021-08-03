@@ -32,7 +32,7 @@ adminUserController.post(
         try {
             await UserService.saveNew(user);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             console.log(error);
             return;
         }
@@ -41,7 +41,7 @@ adminUserController.post(
             Mailer.sendVerificationEmail(user!.email, user!.username, user!.activationCode!);
         });
 
-        ResponseHandler.sendResponse(res, 201, "User created successfully!");
+        ResponseHandler.sendResponse(201, "User created successfully!");
     }
 );
 
@@ -53,11 +53,11 @@ adminUserController.delete(
         try {
             await UserService.deleteOne(req.params.username);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "User deleted successfully!");
+        ResponseHandler.sendOk("User deleted successfully!");
     }
 );
 
@@ -71,11 +71,11 @@ adminUserController.put(
         try {
             await UserService.updateUsername(req.params.username, req.body.data.newUsername);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Username updated successfully!");
+        ResponseHandler.sendOk("Username updated successfully!");
     }
 );
 
@@ -88,11 +88,11 @@ adminUserController.put(
         try {
             await UserService.updateFullname(req.params.username, req.body.data.newFullname);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Fullname updated successfully!");
+        ResponseHandler.sendOk("Fullname updated successfully!");
     }
 );
 
@@ -105,11 +105,11 @@ adminUserController.put(
         try {
             await UserService.updatePassword(req.params.username, req.body.data.newPassword);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Password updated successfully!");
+        ResponseHandler.sendOk("Password updated successfully!");
     }
 );
 
@@ -122,11 +122,11 @@ adminUserController.put(
         try {
             await UserService.updateEmail(req.params.username, req.body.data.newEmail);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Email updated successfully!");
+        ResponseHandler.sendOk("Email updated successfully!");
     }
 );
 
@@ -139,11 +139,11 @@ adminUserController.put(
         try {
             await UserService.updateRole(req.params.username, req.body.data.newRole);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Role updated successfully!");
+        ResponseHandler.sendOk("Role updated successfully!");
     }
 );
 
@@ -158,11 +158,11 @@ adminUserController.put(
         try {
             await UserService.updateBlocked(req.params.username, blocked);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, `User ${blocked ? "" : "un"}blocked successfully`);
+        ResponseHandler.sendOk(`User ${blocked ? "" : "un"}blocked successfully`);
     }
 );
 

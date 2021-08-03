@@ -4,7 +4,7 @@ import UserService from "../service/UserService";
 
 async function usernameExistsHandler(username: string, req: Request, res: Response, next: NextFunction) {
     if (!(await UserService.exists(username))) {
-        ResponseHandler.sendNotFound(res, "User not found.");
+        ResponseHandler.sendNotFound("User not found.");
         return;
     }
 

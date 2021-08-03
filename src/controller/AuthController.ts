@@ -19,7 +19,7 @@ authController.post(
             authenticated: true,
         };
 
-        ResponseHandler.sendOk(res, "User authenticated!");
+        ResponseHandler.sendOk("User authenticated!");
     }
 );
 
@@ -31,7 +31,7 @@ authController.post("/logout", isAuthenticatedMid, (req: Request, res: Response)
         authenticated: false,
     };
 
-    ResponseHandler.sendOk(res, "Logout successful!");
+    ResponseHandler.sendOk("Logout successful!");
 });
 
 export default authController;

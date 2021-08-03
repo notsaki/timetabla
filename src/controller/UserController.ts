@@ -24,12 +24,12 @@ userController.put(
         try {
             await UserService.updatePassword(req.session.user!.username!, req.body.newPassword);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
 
             console.log(error);
         }
 
-        ResponseHandler.sendOk(res, "Password updated successfully!");
+        ResponseHandler.sendOk("Password updated successfully!");
     }
 );
 
@@ -42,12 +42,12 @@ userController.get(
         try {
             await UserService.resetActivationCode(req.params.username);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
 
             console.log(error);
         }
 
-        ResponseHandler.sendOk(res, "User activated successfully!");
+        ResponseHandler.sendOk("User activated successfully!");
     }
 );
 
@@ -57,7 +57,7 @@ userController.post("/:username/reset", usernameExistsMid, async (req: Request, 
     try {
         await UserService.createResetCode(username);
     } catch (error: any) {
-        ResponseHandler.sendInternalServerError(res);
+        ResponseHandler.sendInternalServerError();
         return;
     }
 
@@ -65,7 +65,7 @@ userController.post("/:username/reset", usernameExistsMid, async (req: Request, 
         Mailer.sendPasswordResetEmail(user!.email, user!.username, user!.resetCode!);
     });
 
-    ResponseHandler.sendOk(res, "Email for password reset has been sent.");
+    ResponseHandler.sendOk("Email for password reset has been sent.");
 });
 
 userController.post(
@@ -78,11 +78,11 @@ userController.post(
             await UserService.resetResetCode(req.params.username);
             await UserService.updatePassword(req.params.username, req.body.newPassword);
         } catch (error: any) {
-            ResponseHandler.sendInternalServerError(res);
+            ResponseHandler.sendInternalServerError();
             return;
         }
 
-        ResponseHandler.sendOk(res, "Password has been reset.");
+        ResponseHandler.sendOk("Password has been reset.");
     }
 );
 

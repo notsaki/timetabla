@@ -14,7 +14,7 @@ export async function adminUpdateUpdateUserAuthorisedRoleMid(req: Request, res: 
         const user: User | null = await UserSchema.findOne({ username: req.params.username });
         roleAuthMid(user!.role + 1, req, res, next);
     } catch (error: any) {
-        ResponseHandler.sendInternalServerError(res);
+        ResponseHandler.sendInternalServerError();
         return;
     }
 }

@@ -1,42 +1,54 @@
-import { Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import ResponseBody from "../schema/responsebody/ResponseBody";
 
 class ResponseHandler {
-    static sendResponse(res: Response, status: number, message: string, data: object = {}) {
-        this.sendResponseInj(res, { status, message, data });
+    static res: Response;
+
+    constructor(res: Response) {
+        ResponseHandler.res = res;
     }
 
-    static sendResponseInj(res: Response, body: ResponseBody) {
-        res.status(body.status).json(body).send();
+    static sendResponse(status: number, message: string, data: object = {}) {
+        ResponseHandler.sendResponseInj({ status, message, data });
     }
 
-    static sendOk(res: Response, message = "Ok") {
-        this.sendResponse(res, 200, message);
+    static sendResponseInj(body: ResponseBody) {
+        ResponseHandler.res.status(body.status).json(body).send();
     }
 
-    static sendUnauthorised(res: Response, message = "Unauthorised request.") {
-        this.sendResponse(res, 401, message);
+    static sendOk(message = "Ok") {
+        ResponseHandler.sendResponse(200, message);
     }
 
-    static sendUnprocessableEntity(res: Response, message = "Invalid JSON format.") {
-        this.sendResponse(res, 422, message);
+    static sendUnauthorised(message = "Unauthorised request.") {
+        ResponseHandler.sendResponse(401, message);
     }
 
-    static sendConflict(res: Response, message = "Entity already exists in the defined data source.") {
-        this.sendResponse(res, 409, message);
+    static sendUnprocessableEntity(message = "Invalid JSON format.") {
+        ResponseHandler.sendResponse(422, message);
     }
 
-    static sendInternalServerError(res: Response, message = "Internal server error.") {
-        this.sendResponse(res, 500, message);
+    static sendConflict(message = "Entity already exists in the defined data source.") {
+        ResponseHandler.sendResponse(409, message);
     }
 
-    static sendNotFound(res: Response, message = "Entity not found.") {
-        this.sendResponse(res, 404, message);
+    static sendInternalServerError(message = "Internal server error.") {
+        ResponseHandler.sendResponse(500, message);
     }
 
-    static sendMethodNotAllowed(res: Response, message = "Request not allowed for the specific resource") {
-        this.sendResponse(res, 405, message);
+    static sendNotFound(message = "Entity not found.") {
+        ResponseHandler.sendResponse(404, message);
     }
+
+    static sendMethodNotAllowed(message = "Request not allowed for the specific resource") {
+        ResponseHandler.sendResponse(405, message);
+    }
+}
+
+export function setResMid(req: Request, res: Response, next: NextFunction) {
+    ResponseHandler.res = res;
+
+    next();
 }
 
 export default ResponseHandler;

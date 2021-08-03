@@ -4,7 +4,7 @@ import ResponseHandler from "../utils/SendResponse";
 
 async function userConflictHandler(username: string, req: Request, res: Response, next: NextFunction) {
     if (await UserSchema.exists({ username })) {
-        ResponseHandler.sendConflict(res, "Username already exists.");
+        ResponseHandler.sendConflict("Username already exists.");
         return;
     }
 

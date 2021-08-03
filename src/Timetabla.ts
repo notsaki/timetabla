@@ -1,14 +1,15 @@
 import "dotenv/config";
 import express from "express";
-import mongoose, { Error, ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import apiController from "./Api";
-import UserSchema, { Role, User } from "./schema/database/UserSchema";
+import UserSchema, { Role } from "./schema/database/UserSchema";
 import insertTestData from "../test/utils/InsertTestData";
 import session, { SessionOptions } from "express-session";
 import UserService from "./service/UserService";
 import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
+import { setResMid } from "./utils/SendResponse";
 
 const PORT = 8080;
 
@@ -68,6 +69,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session(sessionSettings));
+app.use(setResMid);
 
 /*
  * Controllers
