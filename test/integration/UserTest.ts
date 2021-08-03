@@ -10,6 +10,7 @@ import createUser, { defaultUserBody } from "../utils/CreateUser";
 import UserSchema, { User } from "../../src/schema/database/UserSchema";
 import userLogin from "../utils/UserLogin";
 import UserService from "../../src/service/UserService";
+import PasswordResetBody from "../../src/schema/requestbody/PasswordResetBody";
 const should = chai.should();
 
 chai.use(chaiHttp);
@@ -306,6 +307,16 @@ describe("Users", () => {
             res.should.have.status(404);
             res.body.should.be.not.empty;
         });
+
+        it("Sending activation code for an already activated user should return method not allowed", async () => {
+            const username = "admin";
+            const activationCode = "1d6f9ca63eba57ee2197edcaa4a33e8ba13445d61402a9b31fd0c6b9e1c75dc9$";
+
+            let res: Response = await chai.request(app).get(`/api/user/${username}/activate/${activationCode}`).send();
+
+            res.should.have.status(405);
+            res.body.should.be.not.empty;
+        });
     });
 
     describe("POST /api/user/:username/reset", () => {
@@ -354,6 +365,62 @@ describe("Users", () => {
 
             expect(user.resetCode).to.be.not.null;
             expect(user.resetCode).to.be.not.equals(oldResetCode);
+        });
+
+
+    });
+
+    describe("POST /api/user/:username/reset/:resetcode", function() {
+        it("Request a new reset code and reset password. Should return ok", async function() {
+            const username = "berriesgrease";
+
+            let res: Response = await chai.request(app).post(`/api/user/${username}/reset`).send();
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            let user: User = await UserService.findOne(username);
+
+            expect(user.resetCode).to.be.not.null;
+
+            const resetPasswordBody: PasswordResetBody = { newPassword: "new_password" };
+
+            res = await chai.request(app).post(`/api/user/${username}/reset/${user.resetCode}`).send(resetPasswordBody);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+
+            res = await userLogin(username, resetPasswordBody.newPassword);
+
+            res.should.have.status(200);
+            res.body.should.be.not.empty;
+        });
+
+        it("Sending reset code for non-existent user should return not found", async function() {
+            let user: User = await UserService.findOne("reset_code_user");
+
+            expect(user.resetCode).to.be.not.null;
+
+            const resetPasswordBody: PasswordResetBody = { newPassword: "new_password" };
+
+            const res: Response = await chai
+                .request(app)
+                .post(`/api/user/nonexistent_user/reset/${user.resetCode}`)
+                .send(resetPasswordBody);
+
+            res.should.have.status(404);
+            res.body.should.be.not.empty;
+        });
+
+        it("Sending invalid reset code for non-existent user should return unauthorised", async function() {
+            const resetCode = "1d6f9ca63eba57ee2197edcaa4a33e8ba13445d61402a9b31fd0c6b9e1c75dc9$";
+
+            const resetPasswordBody: PasswordResetBody = { newPassword: "new_password" };
+
+            const res: Response = await chai.request(app).post(`/api/user/reset_code_user/reset/${resetCode}`).send(resetPasswordBody);
+
+            res.should.have.status(401);
+            res.body.should.be.not.empty;
         });
     });
 });

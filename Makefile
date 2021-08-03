@@ -20,8 +20,16 @@ dev:
 dev-run:
 	npm run dev-run
 
-app-test:
-	npm test
+app-unit-test:
+	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha --exit "test/unit/**/*.ts"
+
+app-int-test:
+	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha --exit "test/integration/**/*.ts"
+
+app-test: app-unit-test app-int-test
 
 test-file:
-	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha 'test/**/$(F).ts'
+	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha --exit "test/**/$(F).ts"
+
+test-grep:
+	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha --exit "test/**/*.ts" -g "$(G)"

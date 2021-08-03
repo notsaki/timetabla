@@ -1,11 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import UserSchema from "../schema/database/UserSchema";
-import ResponseBody from "../schema/responsebody/ResponseBody";
-import sendResponse from "../utils/SendResponse";
 import ResponseHandler from "../utils/SendResponse";
+import UserService from "../service/UserService";
 
 async function usernameExistsHandler(username: string, req: Request, res: Response, next: NextFunction) {
-    if (!(await UserSchema.exists({ username }))) {
+    if (!(await UserService.exists(username))) {
         ResponseHandler.sendNotFound(res, "User not found.");
         return;
     }

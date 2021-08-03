@@ -27,6 +27,10 @@ class UserService {
         return UserSchema.findOne({ username });
     }
 
+    static async exists(username: string): Promise<boolean> {
+        return UserSchema.exists({ username });
+    }
+
     static async updatePassword(username: string, password: string) {
         password = hashNew(password);
 

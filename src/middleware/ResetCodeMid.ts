@@ -15,7 +15,7 @@ export async function resetCodeMatchesUsernameMid(req: Request, res: Response, n
 }
 
 export async function activationCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
-    const user: User | null = await UserService.findOne(req.params.username);
+    const user: User = res.locals.user ?? (await UserService.findOne(req.params.username));
 
     if (!user) {
         ResponseHandler.sendNotFound(res, "User not found.");
@@ -24,6 +24,17 @@ export async function activationCodeMatchesUsernameMid(req: Request, res: Respon
 
     if (user.activationCode !== req.params.activationcode) {
         ResponseHandler.sendUnauthorised(res, "Invalid activation code.");
+        return;
+    }
+
+    next();
+}
+
+export async function userIsAlreadyActivatedMid(req: Request, res: Response, next: NextFunction) {
+    const user: User = res.locals.user ?? (await UserService.findOne(req.params.username));
+
+    if (!user.activationCode) {
+        ResponseHandler.sendMethodNotAllowed(res, "User already activated.");
         return;
     }
 

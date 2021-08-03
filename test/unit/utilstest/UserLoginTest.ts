@@ -4,9 +4,6 @@ import { Done } from "@testdeck/core";
 import { Response } from "superagent";
 import { resetUserCollectionState } from "../../utils/BeforeEach";
 import userLogin, { headAdminLogin, getSessionId } from "utils/UserLogin";
-import RegisterUserBody from "../../../src/schema/requestbody/RegisterUserBody";
-import AdminRequestBody from "../../../src/schema/requestbody/admin/AdminRequestBody";
-import UserSchema, { Role } from "../../../src/schema/database/UserSchema";
 const should = chai.should();
 
 chai.use(chaiHttp);

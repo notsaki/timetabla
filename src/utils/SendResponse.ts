@@ -33,6 +33,10 @@ class ResponseHandler {
     static sendNotFound(res: Response, message = "Entity not found.") {
         this.sendResponse(res, 404, message);
     }
+
+    static sendMethodNotAllowed(res: Response, message = "Request not allowed for the specific resource") {
+        this.sendResponse(res, 405, message);
+    }
 }
 
 export default ResponseHandler;
