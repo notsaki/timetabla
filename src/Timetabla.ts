@@ -7,7 +7,7 @@ import apiController from "./Api";
 import UserSchema, { Role } from "./schema/database/UserSchema";
 import insertTestData from "../test/utils/InsertTestData";
 import session, { SessionOptions } from "express-session";
-import UserService from "./service/UserService";
+import UserRepository from "./repository/UserRepository";
 import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
 import setHandlers from "./middleware/SetHandlers";
 
@@ -94,7 +94,7 @@ mongoose
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
-                        UserService.saveNew({
+                        UserRepository.saveNew({
                             _id: undefined,
                             username: process.env.APPLICATION_ADMIN_USERNAME!,
                             password: process.env.APPLICATION_ADMIN_PASSWORD!,

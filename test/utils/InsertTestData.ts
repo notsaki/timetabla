@@ -1,6 +1,6 @@
 import UserSchema, { User } from "../../src/schema/database/UserSchema";
 import fs from "fs";
-import UserService from "../../src/service/UserService";
+import UserRepository from "../../src/repository/UserRepository";
 
 async function insertTestData() {
     insertTestUsers()
@@ -15,7 +15,7 @@ export async function insertTestUsers() {
 
     let users: User[] = JSON.parse(fs.readFileSync("./test/testdata/users.json", "utf-8"));
 
-    await UserService.saveMany(users);
+    await UserRepository.saveMany(users);
 }
 
 export default insertTestData;

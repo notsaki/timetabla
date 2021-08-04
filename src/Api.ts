@@ -1,5 +1,4 @@
 import { Router } from "express";
-import adminUserController from "./controller/admincontroller/AdminUserController";
 import authController from "./controller/AuthController";
 import adminController from "./controller/admincontroller/AdminController";
 import isAuthenticatedMid from "./middleware/IsAuthenticatedMid";

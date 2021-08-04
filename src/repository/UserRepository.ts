@@ -1,16 +1,16 @@
 import UserSchema, { Role, User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
-import mongoose from "mongoose";
 import randomString from "../utils/RandomString";
+import EntityNotFoundError from "../error/EntityNotFoundError";
 
-class UserService {
-    static async saveNew(user: User) {
+export default class UserRepository {
+    static async saveOne(user: User): Promise<void> {
         user.password = hashNew(user.password);
 
         await new UserSchema(user).save();
     }
 
-    static async saveMany(users: User[]) {
+    static async saveMany(users: User[]): Promise<void> {
         users.map((user: User) => {
             user.password = hashNew(user.password);
             return user;
@@ -19,16 +19,42 @@ class UserService {
         await UserSchema.insertMany(users);
     }
 
-    static async deleteOne(username: string) {
+    static async deleteOne(username: string): Promise<void> {
         await UserSchema.deleteOne({ username });
     }
 
-    static async findOne(username: string): Promise<User | null> {
-        return UserSchema.findOne({ username });
+    static async deleteMany(search: object): Promise<void> {
+        await UserSchema.deleteMany(search);
+    }
+
+    static async findOne(username: string): Promise<User> {
+        const user: User | null = await UserSchema.findOne({ username });
+
+        if (!user) {
+            throw new EntityNotFoundError("User not found.");
+        }
+
+        return user;
+    }
+
+    static async findMany(search: object): Promise<User[]> {
+        return UserSchema.find(search);
     }
 
     static async exists(username: string): Promise<boolean> {
         return UserSchema.exists({ username });
+    }
+
+    static async count(search: object): Promise<number> {
+        return UserSchema.count(search);
+    }
+
+    static async updateOne(username: string, update: object): Promise<void> {
+        await UserSchema.updateOne({ username }, update);
+    }
+
+    static async updateMany(search: object, update: object): Promise<void> {
+        await UserSchema.updateMany(search, update);
     }
 
     static async updatePassword(username: string, password: string) {
@@ -69,5 +95,3 @@ class UserService {
         await UserSchema.updateOne({ username }, { activationCode: undefined });
     }
 }
-
-export default UserService;

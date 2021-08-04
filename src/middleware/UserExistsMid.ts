@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import ResponseHandler from "../utils/ResponseHandler";
-import UserService from "../service/UserService";
+import UserRepository from "../repository/UserRepository";
 
 async function usernameExistsHandler(username: string, req: Request, res: Response, next: NextFunction) {
-    if (!(await UserService.exists(username))) {
+    if (!(await UserRepository.exists(username))) {
         ResponseHandler.sendNotFound("User not found.");
         return;
     }

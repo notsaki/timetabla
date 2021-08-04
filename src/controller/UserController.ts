@@ -2,7 +2,7 @@ import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { passwordResetSchemaValidator, updatePasswordSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
 import { verifyLoginCredentialsUpdatePasswordMid } from "../middleware/VerifyLoginCredentialsMid";
 import { Request, Response, Router } from "express";
-import UserService from "../service/UserService";
+import UserRepository from "../repository/UserRepository";
 import ResponseHandler from "../utils/ResponseHandler";
 import { User } from "../schema/database/UserSchema";
 import Mailer from "../utils/Mailer";
@@ -22,7 +22,7 @@ userController.put(
     verifyLoginCredentialsUpdatePasswordMid,
     async (req: Request, res: Response) => {
         try {
-            await UserService.updatePassword(req.session.user!.username!, req.body.newPassword);
+            await UserRepository.updatePassword(req.session.user!.username!, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
 
@@ -40,7 +40,7 @@ userController.get(
     activationCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await UserService.resetActivationCode(req.params.username);
+            await UserRepository.resetActivationCode(req.params.username);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
 
@@ -55,13 +55,13 @@ userController.post("/:username/reset", usernameExistsMid, async (req: Request, 
     const username: string = req.params.username;
 
     try {
-        await UserService.createResetCode(username);
+        await UserRepository.createResetCode(username);
     } catch (error: any) {
         ResponseHandler.sendInternalServerError();
         return;
     }
 
-    UserService.findOne(username).then((user: User | null) => {
+    UserRepository.findOne(username).then((user: User | null) => {
         Mailer.sendPasswordResetEmail(user!.email, user!.username, user!.resetCode!);
     });
 
@@ -75,8 +75,8 @@ userController.post(
     resetCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await UserService.resetResetCode(req.params.username);
-            await UserService.updatePassword(req.params.username, req.body.newPassword);
+            await UserRepository.resetResetCode(req.params.username);
+            await UserRepository.updatePassword(req.params.username, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;

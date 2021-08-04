@@ -9,7 +9,7 @@ import {
     userSchemaValidator,
 } from "../../middleware/SchemaValidatorMiddleware";
 import UserSchema, { User } from "../../schema/database/UserSchema";
-import UserService from "../../service/UserService";
+import UserRepository from "../../repository/UserRepository";
 import { adminUpdateUsernameConflictMid, userConflictMid } from "../../middleware/UserConflictMid";
 import { usernameExistsMid } from "../../middleware/UserExistsMid";
 import {
@@ -26,18 +26,18 @@ adminUserController.post(
     userSchemaValidator,
     userCreationAuthorisedRoleMid,
     userConflictMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         const user: User = req.body.data;
 
         try {
-            await UserService.saveNew(user);
+            await UserRepository.saveOne(user);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             console.log(error);
             return;
         }
 
-        UserService.findOne(user.username).then((user: User | null) => {
+        UserRepository.findOne(user.username).then((user: User | null) => {
             Mailer.sendVerificationEmail(user!.email, user!.username, user!.activationCode!);
         });
 
@@ -49,9 +49,9 @@ adminUserController.delete(
     "/:username",
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.deleteOne(req.params.username);
+            await UserRepository.deleteOne(req.params.username);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -67,9 +67,9 @@ adminUserController.put(
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
     adminUpdateUsernameConflictMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.updateUsername(req.params.username, req.body.data.newUsername);
+            await UserRepository.updateUsername(req.params.username, req.body.data.newUsername);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -84,9 +84,9 @@ adminUserController.put(
     adminUpdateFullnameSchemaValidator,
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.updateFullname(req.params.username, req.body.data.newFullname);
+            await UserRepository.updateFullname(req.params.username, req.body.data.newFullname);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -101,9 +101,9 @@ adminUserController.put(
     adminUpdatePasswordSchemaValidator,
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.updatePassword(req.params.username, req.body.data.newPassword);
+            await UserRepository.updatePassword(req.params.username, req.body.data.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -118,9 +118,9 @@ adminUserController.put(
     adminUpdateEmailSchemaValidator,
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.updateEmail(req.params.username, req.body.data.newEmail);
+            await UserRepository.updateEmail(req.params.username, req.body.data.newEmail);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -135,9 +135,9 @@ adminUserController.put(
     adminUpdateRoleSchemaValidator,
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         try {
-            await UserService.updateRole(req.params.username, req.body.data.newRole);
+            await UserRepository.updateRole(req.params.username, req.body.data.newRole);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
@@ -152,11 +152,11 @@ adminUserController.put(
     adminBlockUserSchemaValidator,
     usernameExistsMid,
     adminUpdateUpdateUserAuthorisedRoleMid,
-    async (req: Request, res: Response) => {
+    async function (req: Request, res: Response) {
         const blocked: boolean = req.body.data.block;
 
         try {
-            await UserService.updateBlocked(req.params.username, blocked);
+            await UserRepository.updateBlocked(req.params.username, blocked);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;
