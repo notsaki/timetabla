@@ -4,8 +4,11 @@ import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { Role } from "../schema/database/UserSchema";
 import verifyLoginCredentialsMid from "../middleware/VerifyLoginCredentialsMid";
 import ResponseHandler from "../utils/ResponseHandler";
+import UserRepository from "../repository/UserRepository";
 
 const authController = Router();
+
+const userRepository = new UserRepository();
 
 authController.post(
     "/login",

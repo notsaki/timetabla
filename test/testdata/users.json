@@ -138,5 +138,85 @@
         "resetCode": "1d6f9ca63eba57ee2197edcaa4a33e8ba13445d61402a9b31fd0c6b9e1c75dc9",
         "role": 1,
         "blocked": false
+    },
+    {
+        "username": "tmanopoulos",
+        "password": "password",
+        "fullname": "Thalis Manopoulos",
+        "email": "thalis.manopoulos@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "athanakos",
+        "password": "password",
+        "fullname": "Andronikos Thanakos",
+        "email": "andronikos.thanakos@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "ganastellis",
+        "password": "password",
+        "fullname": "Grigorios Anastellis",
+        "email": "grigorios.anastellis@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "rmiskallis",
+        "password": "password",
+        "fullname": "Romanos Miskallis",
+        "email": "romanos.miskallis@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "sstavriadis",
+        "password": "password",
+        "fullname": "Sotiris Stavriadis",
+        "email": "sotiris.stavriadis@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "vmitrallou",
+        "password": "password",
+        "fullname": "Vaso Mitrallou",
+        "email": "vaso.mitrallou@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "tvlachiiadi",
+        "password": "password",
+        "fullname": "Thalia Vlachiiadi",
+        "email": "thalia.vlachiiadi@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
+    },
+    {
+        "username": "amella",
+        "password": "password",
+        "fullname": "Anna Mella",
+        "email": "anna.mella@timetabla.com",
+        "activationCode": null,
+        "resetCode": null,
+        "role": 2,
+        "blocked": false
     }
 ]

@@ -10,6 +10,7 @@ import session, { SessionOptions } from "express-session";
 import UserRepository from "./repository/UserRepository";
 import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
 import setHandlers from "./middleware/SetHandlers";
+import SingletonRepository from "./SingletonRepository";
 
 const PORT = 8080;
 
@@ -90,23 +91,26 @@ mongoose
 
             switch (process.env.ENVIRONMENT) {
                 case "dev":
-                    insertTestData().then(() => console.log("Testing data added successfully!"));
+                    insertTestData()
+                        .then(() => console.log("Testing data added successfully!"))
+                        .catch((error: any) => console.log(error));
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
-                        UserRepository.saveNew({
-                            _id: undefined,
-                            username: process.env.APPLICATION_ADMIN_USERNAME!,
-                            password: process.env.APPLICATION_ADMIN_PASSWORD!,
-                            email: process.env.APPLICATION_ADMIN_EMAIL!,
-                            fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
-                            role: Role.HeadAdmin,
-                            activationCode: undefined,
-                            blocked: false,
-                            resetCode: undefined,
-                        })
+                        SingletonRepository.userRepository
+                            .saveOne({
+                                _id: undefined,
+                                username: process.env.APPLICATION_ADMIN_USERNAME!,
+                                password: process.env.APPLICATION_ADMIN_PASSWORD!,
+                                email: process.env.APPLICATION_ADMIN_EMAIL!,
+                                fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
+                                role: Role.HeadAdmin,
+                                activationCode: undefined,
+                                blocked: false,
+                                resetCode: undefined,
+                            })
                             .then(() => console.log("Admin user has been created."))
-                            .catch((error) => console.log(`Could not create admin user: ${error.message}`));
+                            .catch((error: any) => console.log(`Could not create admin user: ${error.message}`));
                     }
                     break;
             }

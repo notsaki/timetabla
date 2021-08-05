@@ -2,15 +2,16 @@ import UserSchema, { Role, User } from "../schema/database/UserSchema";
 import { hashNew } from "../utils/Hash";
 import randomString from "../utils/RandomString";
 import EntityNotFoundError from "../error/EntityNotFoundError";
+import Repository from "./Repository";
 
-export default class UserRepository {
-    static async saveOne(user: User): Promise<void> {
+export default class UserRepository implements Repository<User> {
+    async saveOne(user: User): Promise<void> {
         user.password = hashNew(user.password);
 
         await new UserSchema(user).save();
     }
 
-    static async saveMany(users: User[]): Promise<void> {
+    async saveMany(users: User[]): Promise<void> {
         users.map((user: User) => {
             user.password = hashNew(user.password);
             return user;
@@ -19,15 +20,15 @@ export default class UserRepository {
         await UserSchema.insertMany(users);
     }
 
-    static async deleteOne(username: string): Promise<void> {
+    async deleteOne(username: string): Promise<void> {
         await UserSchema.deleteOne({ username });
     }
 
-    static async deleteMany(search: object): Promise<void> {
+    async deleteMany(search: object): Promise<void> {
         await UserSchema.deleteMany(search);
     }
 
-    static async findOne(username: string): Promise<User> {
+    async findOne(username: string): Promise<User> {
         const user: User | null = await UserSchema.findOne({ username });
 
         if (!user) {
@@ -37,61 +38,61 @@ export default class UserRepository {
         return user;
     }
 
-    static async findMany(search: object): Promise<User[]> {
+    async findMany(search: object): Promise<User[]> {
         return UserSchema.find(search);
     }
 
-    static async exists(username: string): Promise<boolean> {
+    async exists(username: string): Promise<boolean> {
         return UserSchema.exists({ username });
     }
 
-    static async count(search: object): Promise<number> {
+    async count(search: object): Promise<number> {
         return UserSchema.count(search);
     }
 
-    static async updateOne(username: string, update: object): Promise<void> {
+    async updateOne(username: string, update: object): Promise<void> {
         await UserSchema.updateOne({ username }, update);
     }
 
-    static async updateMany(search: object, update: object): Promise<void> {
+    async updateMany(search: object, update: object): Promise<void> {
         await UserSchema.updateMany(search, update);
     }
 
-    static async updatePassword(username: string, password: string) {
+    async updatePassword(username: string, password: string) {
         password = hashNew(password);
 
         await UserSchema.updateOne({ username }, { password });
     }
 
-    static async updateUsername(username: string, newUsername: string) {
+    async updateUsername(username: string, newUsername: string) {
         await UserSchema.updateOne({ username }, { username: newUsername });
     }
 
-    static async updateEmail(username: string, email: string) {
+    async updateEmail(username: string, email: string) {
         await UserSchema.updateOne({ username }, { email });
     }
 
-    static async updateFullname(username: string, fullname: string) {
+    async updateFullname(username: string, fullname: string) {
         await UserSchema.updateOne({ username }, { fullname });
     }
 
-    static async updateBlocked(username: string, blocked: boolean) {
+    async updateBlocked(username: string, blocked: boolean) {
         await UserSchema.updateOne({ username }, { blocked });
     }
 
-    static async updateRole(username: string, role: Role) {
+    async updateRole(username: string, role: Role) {
         await UserSchema.updateOne({ username }, { role });
     }
 
-    static async createResetCode(username: string) {
+    async createResetCode(username: string) {
         await UserSchema.updateOne({ username }, { resetCode: randomString() });
     }
 
-    static async resetResetCode(username: string) {
+    async resetResetCode(username: string) {
         await UserSchema.updateOne({ username }, { resetCode: undefined });
     }
 
-    static async resetActivationCode(username: string) {
+    async resetActivationCode(username: string) {
         await UserSchema.updateOne({ username }, { activationCode: undefined });
     }
 }

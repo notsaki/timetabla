@@ -10,9 +10,12 @@ import { User } from "../../src/schema/database/UserSchema";
 import userLogin, { adminLogin, getSessionId } from "../utils/UserLogin";
 import UserRepository from "../../src/repository/UserRepository";
 import PasswordResetBody from "../../src/schema/requestbody/PasswordResetBody";
+import SingletonRepository from "../../src/SingletonRepository";
 const should = chai.should();
 
 chai.use(chaiHttp);
+
+const userRepository: UserRepository = SingletonRepository.userRepository;
 
 describe("Users", () => {
     beforeEach(resetUserCollectionState);
@@ -165,7 +168,7 @@ describe("Users", () => {
         it("Should create a user and activate them", async () => {
             await createUser();
 
-            const user: User = await UserRepository.findOne(defaultUserBody.username);
+            const user: User = await userRepository.findOne(defaultUserBody.username);
 
             let res: Response = await chai
                 .request(app)
@@ -184,7 +187,7 @@ describe("Users", () => {
         it("Create a user and send invalid activation code should return unauthorised", async () => {
             await createUser();
 
-            const user: User = await UserRepository.findOne(defaultUserBody.username);
+            const user: User = await userRepository.findOne(defaultUserBody.username);
 
             let res: Response = await chai
                 .request(app)
@@ -201,7 +204,7 @@ describe("Users", () => {
         });
 
         it("Sending activation code for a wrong user should return unauthorised", async () => {
-            const user: User = await UserRepository.findOne("unactivated_user_2");
+            const user: User = await userRepository.findOne("unactivated_user_2");
 
             let res: Response = await chai
                 .request(app)
@@ -220,7 +223,7 @@ describe("Users", () => {
         it("Sending activation code for non-existant user should return not found", async () => {
             const username = "unactivated_user";
 
-            const user: User = await UserRepository.findOne(username);
+            const user: User = await userRepository.findOne(username);
 
             let res: Response = await chai
                 .request(app)
@@ -251,7 +254,7 @@ describe("Users", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            const user: User = await UserRepository.findOne(username);
+            const user: User = await userRepository.findOne(username);
 
             expect(user.resetCode).to.not.be.null;
         });
@@ -273,7 +276,7 @@ describe("Users", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            let user: User = await UserRepository.findOne(username);
+            let user: User = await userRepository.findOne(username);
 
             expect(user.resetCode).to.be.not.null;
 
@@ -284,7 +287,7 @@ describe("Users", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            user = await UserRepository.findOne(username);
+            user = await userRepository.findOne(username);
 
             expect(user.resetCode).to.be.not.null;
             expect(user.resetCode).to.be.not.equals(oldResetCode);
@@ -300,7 +303,7 @@ describe("Users", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            let user: User = await UserRepository.findOne(username);
+            let user: User = await userRepository.findOne(username);
 
             expect(user.resetCode).to.be.not.null;
 
@@ -318,7 +321,7 @@ describe("Users", () => {
         });
 
         it("Sending reset code for non-existent user should return not found", async function () {
-            let user: User = await UserRepository.findOne("reset_code_user");
+            let user: User = await userRepository.findOne("reset_code_user");
 
             expect(user.resetCode).to.be.not.null;
 

@@ -16,9 +16,12 @@ import {
     AdminUpdateUserRoleBody,
 } from "../../src/schema/requestbody/admin/AdminUpdateUserBody";
 import UserRepository from "../../src/repository/UserRepository";
+import SingletonRepository from "../../src/SingletonRepository";
 const should = chai.should();
 
 chai.use(chaiHttp);
+
+const userRepository: UserRepository = SingletonRepository.userRepository;
 
 describe("Admin", () => {
     beforeEach(resetUserCollectionState);
@@ -208,7 +211,7 @@ describe("Admin", () => {
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(adminCreateUserBody.data.username)).to.be.false;
+            expect(await userRepository.exists(adminCreateUserBody.data.username)).to.be.false;
         });
 
         it("Head admin creating an admin user should return created", async function () {
@@ -233,7 +236,7 @@ describe("Admin", () => {
             res.should.have.status(201);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists("new_admin")).to.be.true;
+            expect(await userRepository.exists("new_admin")).to.be.true;
         });
 
         it("Admin creating an admin user should return unauthorised", async function () {
@@ -259,7 +262,7 @@ describe("Admin", () => {
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(adminCreateUserBody.data.username)).to.be.false;
+            expect(await userRepository.exists(adminCreateUserBody.data.username)).to.be.false;
         });
     });
 
@@ -286,7 +289,7 @@ describe("Admin", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(newUsername)).to.be.true;
+            expect(await userRepository.exists(newUsername)).to.be.true;
         });
 
         it("Non existent user should return not found", async function () {
@@ -352,7 +355,7 @@ describe("Admin", () => {
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(adminUsername)).to.be.true;
+            expect(await userRepository.exists(adminUsername)).to.be.true;
         });
 
         it("Head admin should be able to update another admin's username", async function () {
@@ -374,7 +377,7 @@ describe("Admin", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(newUsername)).to.be.true;
+            expect(await userRepository.exists(newUsername)).to.be.true;
         });
     });
 
@@ -396,7 +399,7 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
-            expect((await UserRepository.findOne(username)).fullname).to.be.equals(newFullname);
+            expect((await userRepository.findOne(username)).fullname).to.be.equals(newFullname);
         });
     });
 
@@ -447,7 +450,7 @@ describe("Admin", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(username)).to.be.true;
+            expect(await userRepository.exists(username)).to.be.true;
         });
     });
 
@@ -471,7 +474,7 @@ describe("Admin", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await UserRepository.exists(username)).to.be.true;
+            expect(await userRepository.exists(username)).to.be.true;
         });
     });
 
@@ -520,7 +523,7 @@ describe("Admin", () => {
                 res.should.have.status(200);
                 res.body.should.be.not.empty;
 
-                expect(await UserRepository.exists(username)).to.be.false;
+                expect(await userRepository.exists(username)).to.be.false;
             });
         });
     });

@@ -15,10 +15,10 @@ mongo-build: set-mongo-docker-compose build
 mongo-up: set-mongo-docker-compose up
 
 dev:
-	npm run dev
+	ENVIRONMENT=dev npm run dev
 
 dev-run:
-	npm run dev-run
+	ENVIRONMENT=dev npm run dev-run
 
 app-unit-test:
 	ENVIRONMENT=test nyc ./node_modules/.bin/_mocha --exit "test/unit/**/*.ts"

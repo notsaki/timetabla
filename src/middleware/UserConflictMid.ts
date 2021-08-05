@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import UserSchema from "../schema/database/UserSchema";
 import ResponseHandler from "../utils/ResponseHandler";
+import SingletonRepository from "../SingletonRepository";
 
 async function userConflictHandler(username: string, req: Request, res: Response, next: NextFunction) {
-    if (await UserSchema.exists({ username })) {
+    if (await SingletonRepository.userRepository.exists(username)) {
         ResponseHandler.sendConflict("Username already exists.");
         return;
     }

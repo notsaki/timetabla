@@ -12,6 +12,9 @@ import {
     userIsAlreadyActivatedMid,
 } from "../middleware/ResetCodeMid";
 import { usernameExistsMid } from "../middleware/UserExistsMid";
+import SingletonRepository from "../SingletonRepository";
+
+const userRepository: UserRepository = SingletonRepository.userRepository;
 
 const userController = Router();
 
@@ -22,7 +25,7 @@ userController.put(
     verifyLoginCredentialsUpdatePasswordMid,
     async (req: Request, res: Response) => {
         try {
-            await UserRepository.updatePassword(req.session.user!.username!, req.body.newPassword);
+            await userRepository.updatePassword(req.session.user!.username!, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
 
@@ -40,7 +43,7 @@ userController.get(
     activationCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await UserRepository.resetActivationCode(req.params.username);
+            await userRepository.resetActivationCode(req.params.username);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
 
@@ -55,13 +58,13 @@ userController.post("/:username/reset", usernameExistsMid, async (req: Request, 
     const username: string = req.params.username;
 
     try {
-        await UserRepository.createResetCode(username);
+        await userRepository.createResetCode(username);
     } catch (error: any) {
         ResponseHandler.sendInternalServerError();
         return;
     }
 
-    UserRepository.findOne(username).then((user: User | null) => {
+    userRepository.findOne(username).then((user: User | null) => {
         Mailer.sendPasswordResetEmail(user!.email, user!.username, user!.resetCode!);
     });
 
@@ -75,8 +78,8 @@ userController.post(
     resetCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await UserRepository.resetResetCode(req.params.username);
-            await UserRepository.updatePassword(req.params.username, req.body.newPassword);
+            await userRepository.resetResetCode(req.params.username);
+            await userRepository.updatePassword(req.params.username, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;

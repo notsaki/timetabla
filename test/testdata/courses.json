@@ -1,0 +1,82 @@
+[
+    {
+        "name": "Calculus I",
+        "professorIds": [],
+        "theoryHours": 4,
+        "labHours": 0,
+        "coachingHours": 0,
+        "semester": 0
+    },
+    {
+        "name": "Linear Algebra",
+        "professorIds": [],
+        "theoryHours": 4,
+        "labHours": 0,
+        "coachingHours": 0,
+        "semester": 0
+    },
+    {
+        "name": "Logic Design",
+        "professorIds": [],
+        "theoryHours": 3,
+        "labHours": 2,
+        "coachingHours": 0,
+        "semester": 0
+    },
+    {
+        "name": "Programming I",
+        "professorIds": [],
+        "theoryHours": 3,
+        "labHours": 2,
+        "coachingHours": 0,
+        "semester": 0
+    },
+    {
+        "name": "Physics I",
+        "professorIds": [],
+        "theoryHours": 4,
+        "labHours": 0,
+        "coachingHours": 0,
+        "semester": 0
+    },
+    {
+        "name": "Calculus II",
+        "professorIds": [],
+        "theoryHours": 4,
+        "labHours": 0,
+        "coachingHours": 0,
+        "semester": 1
+    },
+    {
+        "name": "Introduction To Computers",
+        "professorIds": [],
+        "theoryHours": 3,
+        "labHours": 2,
+        "coachingHours": 0,
+        "semester": 1
+    },
+    {
+        "name": "Object Oriented Programming",
+        "professorIds": [],
+        "theoryHours": 3,
+        "labHours": 2,
+        "coachingHours": 0,
+        "semester": 1
+    },
+    {
+        "name": "Discrete Mathematics",
+        "professorIds": [],
+        "theoryHours": 4,
+        "labHours": 0,
+        "coachingHours": 0,
+        "semester": 1
+    },
+    {
+        "name": "Physics II",
+        "professorIds": [],
+        "theoryHours": 4,
+        "coachingHours": 0,
+        "labHours": 0,
+        "semester": 1
+    }
+]
