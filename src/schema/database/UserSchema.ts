@@ -24,7 +24,7 @@ export class User {
     role: Role = Role.Student;
     activationCode?: string = randomString();
     resetCode?: string = undefined;
-    blocked: boolean = false;
+    blocked?: boolean = false;
 }
 
 const schema = new Schema<User>({

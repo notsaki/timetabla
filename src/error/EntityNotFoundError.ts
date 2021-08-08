@@ -1,8 +1,8 @@
 import ErrorCode from "../schema/ErrorCode";
 
 class EntityNotFoundError extends Error {
-    constructor(message = `${ErrorCode.EntityNotFound}: Entity not found`) {
-        super(message);
+    constructor(message = "Entity not found") {
+        super(`${ErrorCode.EntityNotFound}: ${message}`);
     }
 }
 

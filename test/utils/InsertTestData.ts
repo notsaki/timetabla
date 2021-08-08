@@ -2,8 +2,8 @@ import UserSchema, { User } from "../../src/schema/database/UserSchema";
 import fs from "fs";
 import CourseSchema, { Course } from "../../src/schema/database/CourseSchema";
 import { Model } from "mongoose";
-import Repository from "../../src/repository/Repository";
-import SingletonRepository from "../../src/SingletonRepository";
+import ServiceSingleton from "../../src/singleton/ServiceSingleton";
+import Service from "../../src/service/Service";
 
 export default async function insertTestData() {
     await insertTestUsers();
@@ -14,19 +14,19 @@ export default async function insertTestData() {
 }
 
 export async function insertTestUsers() {
-    await resetCollection<User>(UserSchema, "users.json", SingletonRepository.userRepository);
+    await resetCollection<User>(UserSchema, "users.json", ServiceSingleton.userService);
 }
 
 export async function insertTestCourses() {
-    await resetCollection<Course>(CourseSchema, "courses.json", SingletonRepository.courseRepository);
+    await resetCollection<Course>(CourseSchema, "courses.json", ServiceSingleton.courseService);
 }
 
-async function resetCollection<T>(schema: Model<T>, jsonFile: string, repository: Repository<T>) {
+async function resetCollection<T>(schema: Model<T>, jsonFile: string, service: Service) {
     try {
-        await schema.collection.drop();
+        await schema.deleteMany({});
     } catch (error: any) {}
 
     let data: T[] = JSON.parse(fs.readFileSync(`./test/testdata/${jsonFile}`, "utf-8"));
 
-    await repository.saveMany(data);
+    await service.saveMany(data);
 }

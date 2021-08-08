@@ -2,7 +2,6 @@ import isAuthenticatedMid from "../middleware/IsAuthenticatedMid";
 import { passwordResetSchemaValidator, updatePasswordSchemaValidator } from "../middleware/SchemaValidatorMiddleware";
 import { verifyLoginCredentialsUpdatePasswordMid } from "../middleware/VerifyLoginCredentialsMid";
 import { Request, Response, Router } from "express";
-import UserRepository from "../repository/UserRepository";
 import ResponseHandler from "../utils/ResponseHandler";
 import { User } from "../schema/database/UserSchema";
 import Mailer from "../utils/Mailer";
@@ -11,10 +10,11 @@ import {
     resetCodeMatchesUsernameMid,
     userIsAlreadyActivatedMid,
 } from "../middleware/ResetCodeMid";
-import { usernameExistsMid } from "../middleware/UserExistsMid";
-import SingletonRepository from "../SingletonRepository";
+import { idExistsMid } from "../middleware/UserExistsMid";
+import UserService from "../service/UserService";
+import ServiceSingleton from "../singleton/ServiceSingleton";
 
-const userRepository: UserRepository = SingletonRepository.userRepository;
+const userService: UserService = ServiceSingleton.userService;
 
 const userController = Router();
 
@@ -25,10 +25,9 @@ userController.put(
     verifyLoginCredentialsUpdatePasswordMid,
     async (req: Request, res: Response) => {
         try {
-            await userRepository.updatePassword(req.session.user!.username!, req.body.newPassword);
+            await userService.updatePassword(req.session.user!.id!, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
-
             console.log(error);
         }
 
@@ -37,13 +36,13 @@ userController.put(
 );
 
 userController.get(
-    "/:username/activate/:activationcode",
-    usernameExistsMid,
+    "/:id/activate/:activationcode",
+    idExistsMid,
     userIsAlreadyActivatedMid,
     activationCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await userRepository.resetActivationCode(req.params.username);
+            await userService.resetActivationCode(req.params.id);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
 
@@ -54,17 +53,17 @@ userController.get(
     }
 );
 
-userController.post("/:username/reset", usernameExistsMid, async (req: Request, res: Response) => {
-    const username: string = req.params.username;
+userController.post("/:id/reset", idExistsMid, async (req: Request, res: Response) => {
+    const id: string = req.params.id;
 
     try {
-        await userRepository.createResetCode(username);
+        await userService.createResetCode(id);
     } catch (error: any) {
         ResponseHandler.sendInternalServerError();
         return;
     }
 
-    userRepository.findOne(username).then((user: User | null) => {
+    userService.findById(id).then((user: User | null) => {
         Mailer.sendPasswordResetEmail(user!.email, user!.username, user!.resetCode!);
     });
 
@@ -72,14 +71,14 @@ userController.post("/:username/reset", usernameExistsMid, async (req: Request, 
 });
 
 userController.post(
-    "/:username/reset/:resetcode",
-    usernameExistsMid,
+    "/:id/reset/:resetcode",
+    idExistsMid,
     passwordResetSchemaValidator,
     resetCodeMatchesUsernameMid,
     async (req: Request, res: Response) => {
         try {
-            await userRepository.resetResetCode(req.params.username);
-            await userRepository.updatePassword(req.params.username, req.body.newPassword);
+            await userService.resetResetCode(req.params.id);
+            await userService.updatePassword(req.params.id, req.body.newPassword);
         } catch (error: any) {
             ResponseHandler.sendInternalServerError();
             return;

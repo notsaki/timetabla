@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import schemaValidator from "../utils/SchemaValidator";
 import RegisterUserBody from "../schema/requestbody/RegisterUserBody";
 import UpdatePasswordBody from "../schema/requestbody/UpdatePasswordBody";
 import LoginCredentialsBody from "../schema/requestbody/LoginCredentialsBody";
@@ -13,6 +12,27 @@ import {
     AdminUpdateUserRoleBody,
 } from "../schema/requestbody/admin/AdminUpdateUserBody";
 import PasswordResetBody from "../schema/requestbody/PasswordResetBody";
+import NewCourseBody from "../schema/requestbody/NewCourseBody";
+import { plainToClass } from "class-transformer";
+import { validate, ValidationError } from "class-validator";
+import ResponseHandler from "../utils/ResponseHandler";
+
+async function schemaValidator(data: any, res: Response, next: NextFunction, model: any) {
+    const body: unknown[] = plainToClass(model, data);
+
+    validate(body, { skipMissingProperties: true }).then((error: ValidationError[]) => {
+        validatorHandler(error, res, next);
+    });
+}
+
+export function validatorHandler(error: ValidationError[], res: Response, next: NextFunction) {
+    if (error.length > 0) {
+        ResponseHandler.sendUnprocessableEntity("Request body does not match the acceptable schema defined.");
+        return;
+    }
+
+    next();
+}
 
 export async function userSchemaValidator(req: Request, res: Response, next: NextFunction) {
     await schemaValidator(req.body.data, res, next, RegisterUserBody);
@@ -56,4 +76,8 @@ export async function adminUpdatePasswordSchemaValidator(req: Request, res: Resp
 
 export async function adminBlockUserSchemaValidator(req: Request, res: Response, next: NextFunction) {
     await schemaValidator(req.body.data, res, next, AdminBlockUserBody);
+}
+
+export async function addNewCourseSchemaValidator(req: Request, res: Response, next: NextFunction) {
+    await schemaValidator(req.body, res, next, NewCourseBody);
 }

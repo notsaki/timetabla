@@ -6,7 +6,7 @@ import { resetUserCollectionState } from "../utils/BeforeEach";
 import userLogin, { adminLogin, getSessionId, headAdminLogin } from "utils/UserLogin";
 import RegisterUserBody from "../../src/schema/requestbody/RegisterUserBody";
 import AdminRequestBody from "../../src/schema/requestbody/admin/AdminRequestBody";
-import UserSchema, { Role, User } from "../../src/schema/database/UserSchema";
+import { Role, User } from "../../src/schema/database/UserSchema";
 import {
     AdminBlockUserBody,
     AdminUpdateFullnameBody,
@@ -15,13 +15,13 @@ import {
     AdminUpdateUserPasswordBody,
     AdminUpdateUserRoleBody,
 } from "../../src/schema/requestbody/admin/AdminUpdateUserBody";
-import UserRepository from "../../src/repository/UserRepository";
-import SingletonRepository from "../../src/SingletonRepository";
+import UserService from "../../src/service/UserService";
+import ServiceSingleton from "../../src/singleton/ServiceSingleton";
 const should = chai.should();
 
 chai.use(chaiHttp);
 
-const userRepository: UserRepository = SingletonRepository.userRepository;
+const userService: UserService = ServiceSingleton.userService;
 
 describe("Admin", () => {
     beforeEach(resetUserCollectionState);
@@ -53,7 +53,7 @@ describe("Admin", () => {
             res.should.have.status(201);
             res.body.should.be.not.empty;
 
-            expect(await UserSchema.exists({ username: "user" })).to.be.true;
+            expect(await userService.usernameExists("user")).to.be.true;
         });
 
         it("Username already exists. Should respond with conflict response code", async function () {
@@ -211,7 +211,7 @@ describe("Admin", () => {
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(adminCreateUserBody.data.username)).to.be.false;
+            expect(await userService.usernameExists(adminCreateUserBody.data.username)).to.be.false;
         });
 
         it("Head admin creating an admin user should return created", async function () {
@@ -236,7 +236,7 @@ describe("Admin", () => {
             res.should.have.status(201);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists("new_admin")).to.be.true;
+            expect(await userService.usernameExists("new_admin")).to.be.true;
         });
 
         it("Admin creating an admin user should return unauthorised", async function () {
@@ -262,11 +262,11 @@ describe("Admin", () => {
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(adminCreateUserBody.data.username)).to.be.false;
+            expect(await userService.usernameExists(adminCreateUserBody.data.username)).to.be.false;
         });
     });
 
-    describe("PUT /api/admin/user/:username/username", () => {
+    describe("PUT /api/admin/user/:id/username", () => {
         it("Admin role and valid password should return ok and update user's username", async function () {
             let res: Response = await adminLogin();
 
@@ -274,6 +274,7 @@ describe("Admin", () => {
             res.body.should.be.not.empty;
 
             const newUsername = "new_massrarely";
+            const id: string = (await userService.findByUsername("massrarely"))._id;
 
             const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
@@ -282,14 +283,14 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put("/api/admin/user/massrarely/username")
+                .put(`/api/admin/user/${id}/username`)
                 .set("Cookie", getSessionId(res))
                 .send(adminUpdateUsernameBody);
 
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(newUsername)).to.be.true;
+            expect(await userService.usernameExists(newUsername)).to.be.true;
         });
 
         it("Non existent user should return not found", async function () {
@@ -305,7 +306,7 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put("/api/admin/user/non_massrarely/username")
+                .put("/api/admin/user/000000000000000000000000/username")
                 .set("Cookie", getSessionId(res))
                 .send(adminUpdateUsernameBody);
 
@@ -319,6 +320,7 @@ describe("Admin", () => {
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
+            const id: string = (await userService.findByUsername("massrarely"))._id;
             const adminUpdateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
                 data: { newUsername: "admin" },
@@ -326,7 +328,7 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put("/api/admin/user/massrarely/username")
+                .put(`/api/admin/user/${id}/username`)
                 .set("Cookie", getSessionId(res))
                 .send(adminUpdateUsernameBody);
 
@@ -335,6 +337,7 @@ describe("Admin", () => {
         });
 
         it("Admin should not be able to update another admin's username", async function () {
+            const username = "secretary_office_2";
             const updateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
                 data: {
@@ -344,23 +347,24 @@ describe("Admin", () => {
 
             let res: Response = await adminLogin();
 
-            const adminUsername = "secretary_office_2";
+            const id: string = (await userService.findByUsername(username))._id;
 
             res = await chai
                 .request(app)
-                .put(`/api/admin/user/${adminUsername}/username`)
+                .put(`/api/admin/user/${id}/username`)
                 .set("Cookie", getSessionId(res))
                 .send(updateUsernameBody);
 
             res.should.have.status(401);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(adminUsername)).to.be.true;
+            expect(await userService.usernameExists(username)).to.be.true;
         });
 
         it("Head admin should be able to update another admin's username", async function () {
             const newUsername = "new_admin_username";
 
+            const id: string = (await userService.findByUsername("massrarely"))._id;
             const updateUsernameBody: AdminRequestBody<AdminUpdateUsernameBody> = {
                 adminPassword: "password",
                 data: { newUsername },
@@ -370,22 +374,22 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put("/api/admin/user/secretary_office_2/username")
+                .put(`/api/admin/user/${id}/username`)
                 .set("Cookie", getSessionId(res))
                 .send(updateUsernameBody);
 
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(newUsername)).to.be.true;
+            expect(await userService.usernameExists(newUsername)).to.be.true;
         });
     });
 
-    describe("PUT /api/admin/user/:username/fullname", () => {
+    describe("PUT /api/admin/user/:id/fullname", () => {
         it("Admin updating user's fullname should return ok", async function () {
-            const username = "calandrace";
             const newFullname = "New Fullname";
 
+            const id: string = (await userService.findByUsername("calandrace"))._id;
             const body: AdminRequestBody<AdminUpdateFullnameBody> = {
                 adminPassword: "password",
                 data: { newFullname },
@@ -395,19 +399,20 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put(`/api/admin/user/${username}/fullname`)
+                .put(`/api/admin/user/${id}/fullname`)
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
-            expect((await userRepository.findOne(username)).fullname).to.be.equals(newFullname);
+            expect((await userService.findById(id)).fullname).to.equals(newFullname);
         });
     });
 
-    describe("PUT /api/admin/user/:username/password", () => {
+    describe("PUT /api/admin/user/:id/password", () => {
         it("Admin updating user's password should return ok", async function () {
             const username = "calandrace";
             const newPassword = "new_password";
 
+            const id: string = (await userService.findByUsername(username))._id;
             const body: AdminRequestBody<AdminUpdateUserPasswordBody> = {
                 adminPassword: "password",
                 data: { newPassword },
@@ -417,7 +422,7 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put(`/api/admin/user/${username}/password`)
+                .put(`/api/admin/user/${id}/password`)
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
@@ -430,58 +435,57 @@ describe("Admin", () => {
         });
     });
 
-    describe("PUT /api/admin/user/:username/role", () => {
-        it("Admin updating user's password should return ok", async function () {
-            const username = "calandrace";
+    describe("PUT /api/admin/user/:id/role", () => {
+        it("Admin updating user's role should return ok", async function () {
+            const newRole = Role.Admin;
 
+            const id: string = (await userService.findByUsername("calandrace"))._id;
             const body: AdminRequestBody<AdminUpdateUserRoleBody> = {
                 adminPassword: "password",
-                data: { newRole: Role.Admin },
+                data: { newRole },
             };
 
             let res: Response = await adminLogin();
 
-            res = await chai
-                .request(app)
-                .put(`/api/admin/user/${username}/role`)
-                .set("Cookie", getSessionId(res))
-                .send(body);
+            res = await chai.request(app).put(`/api/admin/user/${id}/role`).set("Cookie", getSessionId(res)).send(body);
 
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(username)).to.be.true;
+            expect((await userService.findById(id)).role).to.equals(newRole);
         });
     });
 
-    describe("PUT /api/admin/user/:username/email", () => {
+    describe("PUT /api/admin/user/:id/email", () => {
         it("Admin updating user's email should return ok", async function () {
-            const username = "calandrace";
+            const newEmail = "new_email@timetabla.com";
 
+            const id: string = (await userService.findByUsername("calandrace"))._id;
             const body: AdminRequestBody<AdminUpdateUserEmailBody> = {
                 adminPassword: "password",
-                data: { newEmail: "new_email@timetabla.com" },
+                data: { newEmail },
             };
 
             let res: Response = await adminLogin();
 
             res = await chai
                 .request(app)
-                .put(`/api/admin/user/${username}/email`)
+                .put(`/api/admin/user/${id}/email`)
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
             res.should.have.status(200);
             res.body.should.be.not.empty;
 
-            expect(await userRepository.exists(username)).to.be.true;
+            expect((await userService.findById(id)).email).to.equals(newEmail);
         });
     });
 
-    describe("PUT /api/admin/user/:username/block", () => {
+    describe("PUT /api/admin/user/:id/block", () => {
         it("Admin blocking user should return ok and user login should return forbidden", async function () {
             const username = "calandrace";
 
+            const id: string = (await userService.findByUsername(username))._id;
             const body: AdminRequestBody<AdminBlockUserBody> = {
                 adminPassword: "password",
                 data: { block: true },
@@ -491,7 +495,7 @@ describe("Admin", () => {
 
             res = await chai
                 .request(app)
-                .put(`/api/admin/user/${username}/block`)
+                .put(`/api/admin/user/${id}/block`)
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
@@ -503,10 +507,9 @@ describe("Admin", () => {
             res.should.have.status(403);
         });
 
-        describe("DELETE /api/admin/user/:username", () => {
+        describe("DELETE /api/admin/user/:id", () => {
             it("Admin deleting user should return ok", async function () {
-                const username = "calandrace";
-
+                const id: string = (await userService.findByUsername("calandrace"))._id;
                 const body: AdminRequestBody<any> = {
                     adminPassword: "password",
                     data: {},
@@ -516,14 +519,14 @@ describe("Admin", () => {
 
                 res = await chai
                     .request(app)
-                    .delete(`/api/admin/user/${username}`)
+                    .delete(`/api/admin/user/${id}`)
                     .set("Cookie", getSessionId(res))
                     .send(body);
 
                 res.should.have.status(200);
                 res.body.should.be.not.empty;
 
-                expect(await userRepository.exists(username)).to.be.false;
+                expect(await userService.usernameExists(id)).to.be.false;
             });
         });
     });

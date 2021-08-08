@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import ResponseHandler from "../utils/ResponseHandler";
-import SingletonRepository from "../SingletonRepository";
+import UserService from "../service/UserService";
+import ServiceSingleton from "../singleton/ServiceSingleton";
+
+const userService: UserService = ServiceSingleton.userService;
 
 async function userConflictHandler(username: string, req: Request, res: Response, next: NextFunction) {
-    if (await SingletonRepository.userRepository.exists(username)) {
+    if (await userService.usernameExists(username)) {
         ResponseHandler.sendConflict("Username already exists.");
         return;
     }

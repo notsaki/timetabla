@@ -1,8 +1,8 @@
 import ErrorCode from "../schema/ErrorCode";
 
 class BlockedUserError extends Error {
-    constructor(message = `${ErrorCode.BlockedUser}: User blocked`) {
-        super(message);
+    constructor(message = "User blocked") {
+        super(`${ErrorCode.BlockedUser}: ${message}`);
     }
 }
 

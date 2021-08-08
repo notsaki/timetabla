@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import verifyLoginCredentials from "../utils/VerifyLoginCredentials";
-import loginCredentialsErrorHandler from "../errorhandler/LoginCredentialsErrorHandler";
 import LoginCredentialsBody from "../schema/requestbody/LoginCredentialsBody";
+import getErrorCode from "../utils/GetErrorCode";
+import ErrorCode from "../schema/ErrorCode";
+import ResponseHandler from "../utils/ResponseHandler";
 
 async function verifyLoginCredentialsHandler(
     loginCredentials: LoginCredentialsBody,
@@ -13,15 +15,28 @@ async function verifyLoginCredentialsHandler(
         res.locals.user = await verifyLoginCredentials(loginCredentials.username, loginCredentials.password);
         next();
     } catch (error: any) {
-        loginCredentialsErrorHandler(error, req, res);
+        switch (getErrorCode(error)) {
+            case ErrorCode.BlockedUser:
+                ResponseHandler.sendForbidden("User is blocked.");
+                return;
+            case ErrorCode.InvalidPassword:
+            case ErrorCode.EntityNotFound:
+                ResponseHandler.sendUnauthorised("Invalid username or password.");
+                return;
+            case ErrorCode.UserNotVerified:
+                ResponseHandler.sendForbidden(
+                    "User not activated. Please check your email for the verification code or request for a new one."
+                );
+                return;
+            default:
+                ResponseHandler.sendInternalServerError();
+                return;
+        }
     }
 }
 
 async function verifyLoginCredentialsMid(req: Request, res: Response, next: NextFunction) {
-    const loginCredentials: LoginCredentialsBody = {
-        username: req.body.username,
-        password: req.body.password,
-    };
+    const loginCredentials: LoginCredentialsBody = req.body;
 
     await verifyLoginCredentialsHandler(loginCredentials, req, res, next);
 }

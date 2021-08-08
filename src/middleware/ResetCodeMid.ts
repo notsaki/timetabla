@@ -1,40 +1,43 @@
 import { Request, NextFunction, Response } from "express";
 import { User } from "../schema/database/UserSchema";
-import UserRepository from "../repository/UserRepository";
 import ResponseHandler from "../utils/ResponseHandler";
-import SingletonRepository from "../SingletonRepository";
+import UserService from "../service/UserService";
+import ServiceSingleton from "../singleton/ServiceSingleton";
 
-const userRepository: UserRepository = SingletonRepository.userRepository;
+const userService: UserService = ServiceSingleton.userService;
 
 export async function resetCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
-    const user: User | null = await userRepository.findOne(req.params.username);
+    try {
+        const user: User | null = await userService.findById(req.params.id);
 
-    if (user!.resetCode !== req.params.resetcode) {
-        ResponseHandler.sendUnauthorised("Invalid reset code.");
-        return;
+        if (user!.resetCode !== req.params.resetcode) {
+            ResponseHandler.sendUnauthorised("Invalid reset code.");
+            return;
+        }
+
+        next();
+    } catch (error: any) {
+        ResponseHandler.sendNotFound("User not found.");
     }
-
-    next();
 }
 
 export async function activationCodeMatchesUsernameMid(req: Request, res: Response, next: NextFunction) {
-    const user: User = res.locals.user ?? (await userRepository.findOne(req.params.username));
+    try {
+        const user: User = res.locals.user ?? (await userService.findById(req.params.id));
 
-    if (!user) {
+        if (user.activationCode !== req.params.activationcode) {
+            ResponseHandler.sendUnauthorised("Invalid activation code.");
+            return;
+        }
+
+        next();
+    } catch (error) {
         ResponseHandler.sendNotFound("User not found.");
-        return;
     }
-
-    if (user.activationCode !== req.params.activationcode) {
-        ResponseHandler.sendUnauthorised("Invalid activation code.");
-        return;
-    }
-
-    next();
 }
 
 export async function userIsAlreadyActivatedMid(req: Request, res: Response, next: NextFunction) {
-    const user: User = res.locals.user ?? (await userRepository.findOne(req.params.username));
+    const user: User = res.locals.user ?? (await userService.findById(req.params.id));
 
     if (!user.activationCode) {
         ResponseHandler.sendMethodNotAllowed("User already activated.");

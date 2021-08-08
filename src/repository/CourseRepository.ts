@@ -3,12 +3,12 @@ import CourseSchema, { Course } from "../schema/database/CourseSchema";
 import Repository from "./Repository";
 
 export default class CourseRepository implements Repository<Course> {
-    async saveOne(course: Course): Promise<void> {
-        await new CourseSchema(course).save();
+    async saveOne(course: Course): Promise<Course> {
+        return await new CourseSchema(course).save();
     }
 
-    async saveMany(users: Course[]): Promise<void> {
-        await CourseSchema.insertMany(users);
+    async saveMany(users: Course[]): Promise<Course[]> {
+        return await CourseSchema.insertMany(users);
     }
 
     async deleteOne(name: string): Promise<void> {
@@ -19,8 +19,8 @@ export default class CourseRepository implements Repository<Course> {
         await CourseSchema.deleteMany(search);
     }
 
-    async findOne(name: string): Promise<Course> {
-        const course: Course | null = await CourseSchema.findOne({ name });
+    async findOne(search: object): Promise<Course> {
+        const course: Course | null = await CourseSchema.findOne(search);
 
         if (!course) {
             throw new EntityNotFoundError("Course not found.");
@@ -33,8 +33,8 @@ export default class CourseRepository implements Repository<Course> {
         return CourseSchema.find(search);
     }
 
-    async exists(name: string): Promise<boolean> {
-        return CourseSchema.exists({ name });
+    async exists(search: object): Promise<boolean> {
+        return CourseSchema.exists(search);
     }
 
     async count(search: object): Promise<number> {
@@ -47,5 +47,15 @@ export default class CourseRepository implements Repository<Course> {
 
     async updateMany(search: object, update: object): Promise<void> {
         await CourseSchema.updateMany(search, update);
+    }
+
+    async findById(id: string): Promise<Course> {
+        const course: Course | null = await CourseSchema.findById(id);
+
+        if (!course) {
+            throw new EntityNotFoundError("Course not found.");
+        }
+
+        return course;
     }
 }

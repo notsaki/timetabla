@@ -6,6 +6,7 @@ import { verifyLoginCredentialsAdminPasswordValidationMid } from "./middleware/V
 import { adminRoleAuthMid } from "./middleware/RoleAuthMid";
 import { adminRequestBodySchemaValidator } from "./middleware/SchemaValidatorMiddleware";
 import userController from "./controller/UserController";
+import courseController from "./controller/CourseController";
 
 const apiController: Router = Router();
 
@@ -19,5 +20,6 @@ apiController.use(
     adminController
 );
 apiController.use("/user", userController);
+apiController.use("/course", courseController);
 
 export default apiController;

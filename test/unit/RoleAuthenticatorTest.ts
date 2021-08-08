@@ -1,8 +1,4 @@
 import chai, { expect } from "chai";
-import { hashNew, verify } from "../../src/utils/Hash";
-import ErrorCode from "../../src/schema/ErrorCode";
-import getErrorCode from "../../src/utils/GetErrorCode";
-import BlockedUserError from "../../src/error/BlockedUserError";
 import roleAuthenticator from "../../src/utils/RoleAuthenticator";
 import { Role } from "../../src/schema/database/UserSchema";
 const should = chai.should();

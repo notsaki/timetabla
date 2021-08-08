@@ -7,10 +7,10 @@ import apiController from "./Api";
 import UserSchema, { Role } from "./schema/database/UserSchema";
 import insertTestData from "../test/utils/InsertTestData";
 import session, { SessionOptions } from "express-session";
-import UserRepository from "./repository/UserRepository";
 import ConnectMongoDBSession, { MongoDBStore } from "connect-mongodb-session";
 import setHandlers from "./middleware/SetHandlers";
-import SingletonRepository from "./SingletonRepository";
+import RepositorySingleton from "./singleton/RepositorySingleton";
+import RegisterUserBody from "./schema/requestbody/RegisterUserBody";
 
 const PORT = 8080;
 
@@ -23,7 +23,7 @@ const store: MongoDBStore = new MongoStore({
 declare module "express-session" {
     export interface SessionData {
         user: {
-            id?: mongoose.Types.ObjectId;
+            id?: string;
             username?: string;
             role: Role;
             authenticated: boolean;
@@ -97,18 +97,16 @@ mongoose
                     break;
                 case "prod":
                     if (!(await UserSchema.exists({ username: "admin" }))) {
-                        SingletonRepository.userRepository
-                            .saveOne({
-                                _id: undefined,
-                                username: process.env.APPLICATION_ADMIN_USERNAME!,
-                                password: process.env.APPLICATION_ADMIN_PASSWORD!,
-                                email: process.env.APPLICATION_ADMIN_EMAIL!,
-                                fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
-                                role: Role.HeadAdmin,
-                                activationCode: undefined,
-                                blocked: false,
-                                resetCode: undefined,
-                            })
+                        const user: RegisterUserBody = {
+                            username: process.env.APPLICATION_ADMIN_USERNAME!,
+                            password: process.env.APPLICATION_ADMIN_PASSWORD!,
+                            email: process.env.APPLICATION_ADMIN_EMAIL!,
+                            fullname: process.env.APPLICATION_ADMIN_FULLNAME!,
+                            role: Role.HeadAdmin,
+                        };
+
+                        RepositorySingleton.userRepository
+                            .saveOne(user)
                             .then(() => console.log("Admin user has been created."))
                             .catch((error: any) => console.log(`Could not create admin user: ${error.message}`));
                     }

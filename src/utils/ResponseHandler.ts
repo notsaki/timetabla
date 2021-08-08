@@ -16,32 +16,36 @@ class ResponseHandler {
         ResponseHandler.res.status(body.status).json(body).send();
     }
 
-    static sendOk(message = "Ok") {
-        ResponseHandler.sendResponse(200, message);
+    static sendOk(message = "Ok", data: object = {}) {
+        ResponseHandler.sendResponse(200, message, data);
     }
 
-    static sendUnauthorised(message = "Unauthorised request.") {
-        ResponseHandler.sendResponse(401, message);
+    static sendUnauthorised(message = "Unauthorised request.", data: object = {}) {
+        ResponseHandler.sendResponse(401, message, data);
     }
 
-    static sendUnprocessableEntity(message = "Invalid JSON format.") {
-        ResponseHandler.sendResponse(422, message);
+    static sendUnprocessableEntity(message = "Invalid JSON format.", data: object = {}) {
+        ResponseHandler.sendResponse(422, message, data);
     }
 
-    static sendConflict(message = "Entity already exists in the defined data source.") {
-        ResponseHandler.sendResponse(409, message);
+    static sendConflict(message = "Entity already exists in the defined data source.", data: object = {}) {
+        ResponseHandler.sendResponse(409, message, data);
     }
 
-    static sendInternalServerError(message = "Internal server error.") {
-        ResponseHandler.sendResponse(500, message);
+    static sendInternalServerError(message = "Internal server error.", data: object = {}) {
+        ResponseHandler.sendResponse(500, message, data);
     }
 
-    static sendNotFound(message = "Entity not found.") {
-        ResponseHandler.sendResponse(404, message);
+    static sendNotFound(message = "Entity not found.", data: object = {}) {
+        ResponseHandler.sendResponse(404, message, data);
     }
 
-    static sendMethodNotAllowed(message = "Request not allowed for the specific resource") {
-        ResponseHandler.sendResponse(405, message);
+    static sendMethodNotAllowed(message = "Request not allowed for the specific resource", data: object = {}) {
+        ResponseHandler.sendResponse(405, message, data);
+    }
+
+    static sendForbidden(message = "User not allowed to access this resource.", data: object = {}) {
+        ResponseHandler.sendResponse(403, message, data);
     }
 }
 
