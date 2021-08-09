@@ -17,7 +17,7 @@ export function studentRoleAuthMid(req: Request, res: Response, next: NextFuncti
 
 function roleAuthMid(role: Role, req: Request, res: Response, next: NextFunction) {
     if (!roleAuthenticator(req.session.user!.role, role)) {
-        ResponseHandler.sendUnauthorised("User's role is not authorised for this request.");
+        ResponseHandler.sendForbidden("User's role is not authorised for this request.");
         return;
     }
 

@@ -17,6 +17,7 @@ import Mailer from "../../utils/Mailer";
 import UserService from "../../service/UserService";
 import ServiceSingleton from "../../singleton/ServiceSingleton";
 import RegisterUserBody from "../../schema/requestbody/RegisterUserBody";
+import { adminNewUserDataValidator, adminUpdateRoleDataValidatorMid } from "../../middleware/DataValidatorMid";
 
 const userService: UserService = ServiceSingleton.userService;
 
@@ -27,6 +28,7 @@ adminUserController.post(
     userSchemaValidator,
     userCreationAuthorisedRoleMid,
     userConflictMid,
+    adminNewUserDataValidator,
     async function (req: Request, res: Response) {
         const userData: RegisterUserBody = req.body.data;
 
@@ -136,6 +138,7 @@ adminUserController.put(
     adminUpdateRoleSchemaValidator,
     idExistsMid,
     adminUpdateUserAuthorisedRoleMid,
+    adminUpdateRoleDataValidatorMid,
     async function (req: Request, res: Response) {
         try {
             await userService.updateRole(req.params.id, req.body.data.newRole);

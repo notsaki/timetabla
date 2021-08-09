@@ -151,7 +151,7 @@ describe("Admin", () => {
             res.body.should.be.not.empty;
         });
 
-        it("Unauthorised session should return unauthorised", async function () {
+        it("Non authorised role should return forbidden", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -171,11 +171,11 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(adminCreateUserBody);
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.body.should.be.not.empty;
         });
 
-        it("Authorised non admin session should return unauthorised", async function () {
+        it("Authorised non admin session should return forbidden", async function () {
             let res: Response = await userLogin("calandrace", "password");
 
             res = await chai
@@ -184,11 +184,11 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send('{"username":"user');
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.body.should.be.not.empty;
         });
 
-        it("Head admin creating a head admin user should return unauthorised", async function () {
+        it("Head admin creating a head admin user should return forbidden", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -208,7 +208,7 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(adminCreateUserBody);
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.body.should.be.not.empty;
 
             expect(await userService.usernameExists(adminCreateUserBody.data.username)).to.be.false;
@@ -239,7 +239,7 @@ describe("Admin", () => {
             expect(await userService.usernameExists("new_admin")).to.be.true;
         });
 
-        it("Admin creating an admin user should return unauthorised", async function () {
+        it("Admin creating an admin user should return forbidden", async function () {
             const adminCreateUserBody: AdminRequestBody<RegisterUserBody> = {
                 adminPassword: "password",
                 data: {
@@ -259,7 +259,7 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(adminCreateUserBody);
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.body.should.be.not.empty;
 
             expect(await userService.usernameExists(adminCreateUserBody.data.username)).to.be.false;
@@ -355,7 +355,7 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(updateUsernameBody);
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.body.should.be.not.empty;
 
             expect(await userService.usernameExists(username)).to.be.true;

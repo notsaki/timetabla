@@ -17,7 +17,7 @@ chai.use(chaiHttp);
 
 const userService: UserService = ServiceSingleton.userService;
 
-describe("Users", () => {
+describe("Admin User", () => {
     beforeEach(resetUserCollectionState);
 
     describe("PUT /api/user/password", () => {

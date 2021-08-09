@@ -7,7 +7,7 @@ import { hashNew } from "../utils/Hash";
 import randomString from "../utils/RandomString";
 
 export default class UserService implements Service {
-    userRepository: UserRepository = RepositorySingleton.userRepository;
+    private userRepository: UserRepository = RepositorySingleton.userRepository;
 
     async findMany(search: object): Promise<any[]> {
         return await this.userRepository.findMany(search);

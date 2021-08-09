@@ -7,6 +7,9 @@ class UpdatePasswordBody {
     @Expose()
     @Matches(RegExp(regex.password))
     newPassword: string;
+
+    @IsDefined()
+    @Expose()
     oldPassword: string;
 }
 

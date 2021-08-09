@@ -8,8 +8,8 @@ import NewCourseBody from "../schema/requestbody/NewCourseBody";
 import UserRepository from "../repository/UserRepository";
 
 export default class CourseService implements Service {
-    courseRepository: CourseRepository = RepositorySingleton.courseRepository;
-    userRepository: UserRepository = RepositorySingleton.userRepository;
+    private courseRepository: CourseRepository = RepositorySingleton.courseRepository;
+    private userRepository: UserRepository = RepositorySingleton.userRepository;
 
     async findOne(search: object): Promise<CourseData> {
         const course: Course = await this.courseRepository.findOne(search);
