@@ -47,6 +47,10 @@ class ResponseHandler {
     static sendForbidden(message = "User not allowed to access this resource.", data: object = {}) {
         ResponseHandler.sendResponse(403, message, data);
     }
+
+    static sendNoContent(message = "No content", data: object = {}) {
+        ResponseHandler.sendResponse(204, message, data);
+    }
 }
 
 export function setResMid(req: Request, res: Response, next: NextFunction) {

@@ -5,7 +5,7 @@ import { Response } from "superagent";
 import { resetCourseCollectionState, resetUserCollectionState } from "../utils/BeforeEach";
 import userLogin, { adminLogin, getSessionId } from "utils/UserLogin";
 import ServiceSingleton from "../../src/singleton/ServiceSingleton";
-import NewCourseBody from "../../src/schema/requestbody/NewCourseBody";
+import CourseBody from "../../src/schema/requestbody/CourseBody";
 import { Semester } from "../../src/schema/database/CourseSchema";
 import CourseService from "../../src/service/CourseService";
 
@@ -21,7 +21,7 @@ describe("Admin Course", () => {
 
     describe("POST /api/admin/course", () => {
         it("Admin creating a course should return ok", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 3,
@@ -45,7 +45,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course including a non-professor user should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: ["100000000000000000001000", "100000000000000000001013"],
                 theoryHours: 3,
@@ -69,7 +69,7 @@ describe("Admin Course", () => {
         });
 
         it("User creating a course should return forbidden", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 3,
@@ -93,7 +93,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with no professors should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: [],
                 theoryHours: 3,
@@ -117,7 +117,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with invalid semester should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 3,
@@ -141,7 +141,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with negative numbers should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "Ham cutting",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: -2,
@@ -165,7 +165,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with empty name should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 3,
@@ -189,7 +189,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with zero hours should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 0,
@@ -213,7 +213,7 @@ describe("Admin Course", () => {
         });
 
         it("Admin creating a course with more than 168 hours in total should return unprocessable entity", async function () {
-            const adminNewCourseBody: NewCourseBody = {
+            const adminNewCourseBody: CourseBody = {
                 name: "",
                 professorIds: ["100000000000000000001012", "100000000000000000001013"],
                 theoryHours: 160,
@@ -234,6 +234,150 @@ describe("Admin Course", () => {
             res.body.should.be.not.empty;
 
             expect(await courseService.exists({ name: adminNewCourseBody.name })).to.be.false;
+        });
+
+        describe("PATCH /api/admin/course", () => {
+            it("Admin updating a course should return ok", async function () {
+                const id: string = (await courseService.findOne({ name: "Logic Design" }))._id;
+
+                const courseBody: CourseBody = {
+                    name: "Ham cutting",
+                    professorIds: ["100000000000000000001012", "100000000000000000001013"],
+                    theoryHours: 3,
+                    labHours: 2,
+                    coachingHours: 2,
+                    semester: Semester.Winter,
+                };
+
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .patch(`/api/admin/course/${id}`)
+                    .set("Cookie", getSessionId(res))
+                    .send(courseBody);
+
+                res.should.have.status(200);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.exists({ name: courseBody.name })).to.be.true;
+            });
+
+            it("Admin updating a course with invalid data should return unprocessable entity", async function () {
+                const id: string = (await courseService.findOne({ name: "Logic Design" }))._id;
+
+                const courseBody: CourseBody = {
+                    name: "Ham cutting",
+                    professorIds: ["100000000000000000001012", "100000000000000000001013"],
+                    theoryHours: 3,
+                    labHours: -1,
+                    coachingHours: 2,
+                    semester: Semester.Winter,
+                };
+
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .patch(`/api/admin/course/${id}`)
+                    .set("Cookie", getSessionId(res))
+                    .send(courseBody);
+
+                res.should.have.status(422);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.exists({ name: courseBody.name })).to.be.false;
+            });
+
+            it("Admin updating a course with no professors included should return unprocessable entity", async function () {
+                const id: string = (await courseService.findOne({ name: "Logic Design" }))._id;
+
+                const courseBody: CourseBody = {
+                    name: "Ham cutting",
+                    professorIds: [],
+                    theoryHours: 3,
+                    labHours: 2,
+                    coachingHours: 2,
+                    semester: Semester.Winter,
+                };
+
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .patch(`/api/admin/course/${id}`)
+                    .set("Cookie", getSessionId(res))
+                    .send(courseBody);
+
+                res.should.have.status(422);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.exists({ name: courseBody.name })).to.be.false;
+            });
+
+            it("Admin updating a non-existent course should return not found", async function () {
+                const courseBody: CourseBody = {
+                    name: "Ham cutting",
+                    professorIds: ["100000000000000000001012", "100000000000000000001013"],
+                    theoryHours: 3,
+                    labHours: 2,
+                    coachingHours: 2,
+                    semester: Semester.Winter,
+                };
+
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .patch(`/api/admin/course/100000000000000000000000`)
+                    .set("Cookie", getSessionId(res))
+                    .send(courseBody);
+
+                res.should.have.status(404);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.exists({ name: courseBody.name })).to.be.false;
+            });
+        });
+
+        describe("DELETE /api/admin/course", () => {
+            it("Admin deleting a course should return ok", async function () {
+                const id: string = (await courseService.findOne({ name: "Logic Design" }))._id;
+
+                let res: Response = await adminLogin();
+
+                res = await chai.request(app).delete(`/api/admin/course/${id}`).set("Cookie", getSessionId(res));
+
+                res.should.have.status(200);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.idExists(id)).to.be.false;
+            });
+
+            it("User deleting a course should return forbidden", async function () {
+                const id: string = (await courseService.findOne({ name: "Logic Design" }))._id;
+
+                let res: Response = await userLogin("scaredfrowning", "password");
+
+                res = await chai.request(app).delete(`/api/admin/course/${id}`).set("Cookie", getSessionId(res));
+
+                res.should.have.status(403);
+                res.body.should.be.not.empty;
+
+                expect(await courseService.idExists(id)).to.be.true;
+            });
+
+            it("Admin deleting a non-existent course should return not found", async function () {
+                let res: Response = await adminLogin();
+
+                res = await chai
+                    .request(app)
+                    .delete("/api/admin/course/100000000000000000000000")
+                    .set("Cookie", getSessionId(res));
+
+                res.should.have.status(404);
+                res.body.should.be.not.empty;
+            });
         });
     });
 });

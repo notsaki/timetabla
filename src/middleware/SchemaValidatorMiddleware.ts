@@ -12,7 +12,7 @@ import {
     AdminUpdateUserRoleBody,
 } from "../schema/requestbody/admin/AdminUpdateUserBody";
 import PasswordResetBody from "../schema/requestbody/PasswordResetBody";
-import NewCourseBody from "../schema/requestbody/NewCourseBody";
+import CourseBody from "../schema/requestbody/CourseBody";
 import { plainToClass } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
 import ResponseHandler from "../utils/ResponseHandler";
@@ -78,6 +78,6 @@ export async function adminBlockUserSchemaValidator(req: Request, res: Response,
     await schemaValidator(req.body.data, res, next, AdminBlockUserBody);
 }
 
-export async function addNewCourseSchemaValidator(req: Request, res: Response, next: NextFunction) {
-    await schemaValidator(req.body, res, next, NewCourseBody);
+export async function courseBodySchemaValidator(req: Request, res: Response, next: NextFunction) {
+    await schemaValidator(req.body, res, next, CourseBody);
 }

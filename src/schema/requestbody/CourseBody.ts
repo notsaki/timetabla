@@ -6,7 +6,7 @@ const regex = {
     name: /.{1,64}/,
 };
 
-export default class NewCourseBody {
+export default class CourseBody {
     @IsDefined()
     @Expose()
     @Matches(RegExp(regex.name))

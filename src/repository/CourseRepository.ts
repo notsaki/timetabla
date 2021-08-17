@@ -11,8 +11,8 @@ export default class CourseRepository implements Repository<Course> {
         return await CourseSchema.insertMany(users);
     }
 
-    async deleteOne(name: string): Promise<void> {
-        await CourseSchema.deleteOne({ name });
+    async deleteOne(_id: string): Promise<void> {
+        await CourseSchema.deleteOne({ _id });
     }
 
     async deleteMany(search: object): Promise<void> {
@@ -41,8 +41,8 @@ export default class CourseRepository implements Repository<Course> {
         return CourseSchema.count(search);
     }
 
-    async updateOne(name: string, update: object): Promise<void> {
-        await CourseSchema.updateOne({ name }, update);
+    async updateOne(_id: string, update: object): Promise<void> {
+        await CourseSchema.updateOne({ _id }, update);
     }
 
     async updateMany(search: object, update: object): Promise<void> {

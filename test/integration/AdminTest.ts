@@ -403,6 +403,7 @@ describe("Admin", () => {
                 .set("Cookie", getSessionId(res))
                 .send(body);
 
+            res.should.have.status(200);
             expect((await userService.findById(id)).fullname).to.equals(newFullname);
         });
     });

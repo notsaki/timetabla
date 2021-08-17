@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import NewCourseBody from "../schema/requestbody/NewCourseBody";
+import CourseBody from "../schema/requestbody/CourseBody";
 import ResponseHandler from "../utils/ResponseHandler";
 import UserService from "../service/UserService";
 import ServiceSingleton from "../singleton/ServiceSingleton";
@@ -7,7 +7,7 @@ import ServiceSingleton from "../singleton/ServiceSingleton";
 const userService: UserService = ServiceSingleton.userService;
 
 export default async function professorIdsExist(req: Request, res: Response, next: NextFunction) {
-    const course: NewCourseBody = req.body;
+    const course: CourseBody = req.body;
 
     const nonExistentIds: string[] = [];
     // course.professorIds.filter(async (id: string) => await userService.idExists(id));

@@ -1,10 +1,11 @@
+import lodash from "lodash";
 import Service from "./Service";
 import { Course } from "../schema/database/CourseSchema";
 import CourseRepository from "../repository/CourseRepository";
 import RepositorySingleton from "../singleton/RepositorySingleton";
 import { User } from "../schema/database/UserSchema";
 import CourseData from "../schema/responsebody/CourseData";
-import NewCourseBody from "../schema/requestbody/NewCourseBody";
+import CourseBody from "../schema/requestbody/CourseBody";
 import UserRepository from "../repository/UserRepository";
 
 export default class CourseService implements Service {
@@ -15,9 +16,11 @@ export default class CourseService implements Service {
         const course: Course = await this.courseRepository.findOne(search);
         const professors: User[] = await this.userRepository.findMany({ _id: { $in: course.professorIds } });
 
-        const { professorIds, ...courseFiltered } = course;
+        type KeyMap<T> = {
+            [key in keyof T]: key;
+        };
 
-        return { ...courseFiltered, professors };
+        return { ...lodash.omit(course, ["professorIds"]), professors };
     }
 
     async findMany(search: object): Promise<CourseData[]> {
@@ -28,19 +31,17 @@ export default class CourseService implements Service {
         for (const course of courses) {
             const professors: User[] = await this.userRepository.findMany({ _id: { $in: course.professorIds } });
 
-            const { professorIds, ...courseFiltered } = course;
-
-            courseData.push({ ...courseFiltered, professors });
+            courseData.push({ ...lodash.omit(course, ["professorIds"]), professors });
         }
 
         return courseData;
     }
 
-    async saveOne(course: NewCourseBody): Promise<void> {
+    async saveOne(course: CourseBody): Promise<void> {
         await this.courseRepository.saveOne(course);
     }
 
-    async saveMany(courses: NewCourseBody[]): Promise<void> {
+    async saveMany(courses: CourseBody[]): Promise<void> {
         await this.courseRepository.saveMany(courses);
     }
 
@@ -70,5 +71,9 @@ export default class CourseService implements Service {
 
     async exists(search: object): Promise<boolean> {
         return await this.courseRepository.exists(search);
+    }
+
+    async idExists(_id: string): Promise<boolean> {
+        return await this.courseRepository.exists({ _id });
     }
 }

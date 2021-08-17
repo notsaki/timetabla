@@ -7,22 +7,11 @@ export function sum(...args: number[]) {
 }
 
 export function anyIs(callback: (arg: number) => boolean, ...args: number[]) {
-    args.forEach((arg: number) => {
-        if (!callback(arg)) {
-            return false;
-        }
-    });
-
-    return true;
-}
-
-export function atLeastOne(callback: (arg: number) => boolean, ...args: number[]) {
     let result: boolean = false;
 
     args.forEach((arg: number) => {
         if (callback(arg)) {
             result = true;
-            return;
         }
     });
 

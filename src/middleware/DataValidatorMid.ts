@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import NewCourseBody from "../schema/requestbody/NewCourseBody";
+import CourseBody from "../schema/requestbody/CourseBody";
 import ResponseHandler from "../utils/ResponseHandler";
-import { atLeastOne, isBetween, sum } from "../utils/DataValidation";
+import { anyIs, isBetween, sum } from "../utils/ListOperations";
 import { Semester } from "../schema/database/CourseSchema";
 import UserService from "../service/UserService";
 import ServiceSingleton from "../singleton/ServiceSingleton";
@@ -26,8 +26,8 @@ export function adminUpdateRoleDataValidatorMid(req: Request, res: Response, nex
     userDataValidator(req.body.data.role, req, res, next);
 }
 
-export async function adminNewCourseDataValidatorMid(req: Request, res: Response, next: NextFunction) {
-    const course: NewCourseBody = req.body;
+export async function adminCourseBodyDataValidatorMid(req: Request, res: Response, next: NextFunction) {
+    const course: CourseBody = req.body;
     const min = 0;
     const max = 168;
 
@@ -55,7 +55,7 @@ export async function adminNewCourseDataValidatorMid(req: Request, res: Response
         errorsList.push(`Hours in total must not exceed ${max}.`);
     }
 
-    if (!atLeastOne((val: number) => val > min, ...courseHours)) {
+    if (anyIs((val: number) => val < min, ...courseHours)) {
         errorsList.push(`At least one hour of lesson time must be provided.`);
     }
 
